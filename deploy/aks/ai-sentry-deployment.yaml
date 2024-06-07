@@ -1,0 +1,290 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: facadeapp
+  labels:
+    app: facadeapp
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: facadeapp-http
+  type: LoadBalancer
+  selector:
+    app: facadeapp
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: facadeapp-headless
+  labels:
+    app: facadeapp-headless
+spec:
+  clusterIP: None
+  selector:
+    app: facadeapp
+  ports:
+    - name: http
+      port: 80
+      targetPort: facadeapp-http
+---
+# Ingress:
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: facadeapp-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: facadeapp
+            port:
+              number: 80
+---
+
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: facadeapp
+spec:
+  serviceName: facadeapp
+  replicas: 1
+  selector:
+    matchLabels:
+      app: facadeapp
+  template:
+    metadata:
+      labels:
+        app: facadeapp
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "facadeapp"
+        dapr.io/app-port: "5000"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http"
+        dapr.io/enable-app-health-check: "true"
+        dapr.io/app-health-check-path: "/dapr/health"
+        dapr.io/app-health-probe-interval: "3"
+        dapr.io/app-health-probe-timeout: "200"
+        dapr.io/app-health-threshold: "2"
+
+    spec:
+      containers:
+        - name: sentryai-facade
+          image: youracr.azurecr.io/ai-sentry-facadeapp:0.1.1
+          imagePullPolicy: Always
+          ports:
+            - name: facadeapp-http
+              containerPort: 5000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            failureThreshold: 3
+          env:
+          - name: "AI-SENTRY-ENDPOINT-CONFIG"
+            value: "{\"pools\":[{\"name\":\"pool1\",\"description\":\"pool1 description\",\"endpoints\":[{\"url\":\"https://youropenaiendpoint.openai.azure.com/openai\",\"api-key\":\"yourkey\"}]},{\"name\":\"pool2\",\"description\":\"pool2 description\",\"endpoints\":[{\"url\":\"https://youropenai.openai.azure.com/openai\",\"api-key\":\"yourkey\"},{\"url\":\"https://youropenai.openai.azure.com/openai\",\"api-key\":\"yourkey\"}]}]}"
+          - name: "LOG-LEVEL"
+            value: "INFO"
+---
+#CosmosDB Logger
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: cosmosdbloggerw
+spec:
+  serviceName: cosmosdblogger
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cosmosdbloggerw
+  template:
+    metadata:
+      labels:
+        app: cosmosdbloggerw
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "cosmosdbloggerw"
+        dapr.io/app-port: "7000"
+        dapr.io/log-as-json: "true"
+        #dapr.io/app-protocol: "http"
+        #dapr.io/enable-app-health-check: "true"
+        #dapr.io/app-health-check-path: "/dapr/health"
+        #dapr.io/app-health-probe-interval: "3"
+        #dapr.io/app-health-probe-timeout: "200"
+        #dapr.io/app-health-threshold: "2"
+
+    spec:
+      containers:
+        - name: sentry-ai-cosmosdblogger
+          image: youracr.azurecr.io/ai-sentry-cosmosdblogger:0.1.1
+          imagePullPolicy: Always
+          ports:
+            - name: cosmoslogger
+              containerPort: 7000
+              protocol: TCP
+          env:
+            - name: "AI-SENTRY-LANGUAGE-ENDPOINT"
+              value: "https://yourlanguageendpoint.cognitiveservices.azure.com/"
+            - name: "AI-SENTRY-LANGUAGE-KEY"
+              value: "your-key"
+            - name: "LOG-LEVEL"
+              value: "DEBUG"
+---
+#Summary Logger Logger
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: cosmosdb-summary-loggerw
+spec:
+  serviceName: cosmosdb-summary-loggerw
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cosmosdb-summary-loggerw
+  template:
+    metadata:
+      labels:
+        app: cosmosdb-summary-loggerw
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "cosmosdb-summary-loggerw"
+        dapr.io/app-port: "7001"
+        dapr.io/log-as-json: "true"
+        #dapr.io/app-protocol: "http"
+        #dapr.io/enable-app-health-check: "true"
+        #dapr.io/app-health-check-path: "/dapr/health"
+        #dapr.io/app-health-probe-interval: "3"
+        #dapr.io/app-health-probe-timeout: "200"
+        #dapr.io/app-health-threshold: "2"
+
+    spec:
+      containers:
+        - name: sentry-ai-summary-logger
+          image: youracr.azurecr.io/ai-sentry-summary-logger:0.1.1
+          imagePullPolicy: Always
+          ports:
+            - name: summarylogger
+              containerPort: 7001
+              protocol: TCP
+          env:
+            - name: "LOG-LEVEL"
+              value: "INFO"
+---
+# Components - REDIS based pub-sub
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: openaipubsub
+spec:
+  type: pubsub.redis
+  version: v1
+  metadata:
+  # These settings will work out of the box if you use `helm install
+  # bitnami/redis`.  If you have your own setup, replace
+  # `redis-master:6379` with your own Redis master address, and the
+  # Redis password with your own Secret's name. For more information,
+  # see https://docs.dapr.io/operations/components/component-secrets .
+  - name: redisHost
+    value: <your-redis-ip>:6379
+  - name: redisPassword
+    value: your-redis-password
+#     secretKeyRef:
+#       name: redis
+#       key: redis-password
+# auth:
+#   secretStore: kubernetes      
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: cosmosdb-log
+spec:
+  type: bindings.azure.cosmosdb
+  version: v1
+  initTimeout: 5m
+  metadata:
+  - name: url
+    value: https://<your-cosmos-endpoint>.documents.azure.com:443/
+  - name: masterKey
+    value: your-key
+  - name: database
+    value: request-logs
+  - name: collection
+    value: logs
+  - name: partitionKey
+    value: "LogId"
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: summary-log
+spec:
+  type: bindings.azure.cosmosdb
+  version: v1
+  initTimeout: 5m
+  metadata:
+  - name: url
+    value: https://<your-cosmos-endpoint>.documents.azure.com:443/
+  - name: masterKey
+    value: your-key
+  - name: database
+    value: summary-logs
+  - name: collection
+    value: logs
+  - name: partitionKey
+    value: "LogId"
+---
+# IF you want to use Event hub as pub sub layer uncomment and fill in below
+
+# apiVersion: dapr.io/v1alpha1
+# kind: Component
+# metadata:
+#   name: openaipubsub
+# spec:
+#   type: pubsub.azure.eventhubs
+#   version: v1
+#   metadata:
+#     # Either connectionString or eventHubNamespace is required
+#     # Use connectionString when *not* using Microsoft Entra ID
+#     - name: connectionString
+#       value: "<your-eh-connection-string>"
+#     # Use eventHubNamespace when using Microsoft Entra ID
+#     # - name: eventHubNamespace
+#     #   value: "namespace"
+#     - name: consumerID # Optional. If not supplied, the runtime will create one.
+#       value: "ai-sentry-logger"
+#     - name: enableEntityManagement
+#       value: "false"
+#     # The following four properties are needed only if enableEntityManagement is set to true
+#     # - name: resourceGroupName
+#     #   value: "test-rg"
+#     # - name: subscriptionID
+#     #   value: "value of Azure subscription ID"
+#     # - name: partitionCount
+#     #   value: "1"
+#     # - name: messageRetentionInDays
+#     #   value: "3"
+#     # Checkpoint store attributes
+#     - name: storageAccountName
+#       value: "<your-storage-account-name>"
+#     - name: storageAccountKey
+#       value: "<your-storage-account-key>"
+#     - name: storageContainerName
+#       value: "ai-sen-checkpoints"
+#     # Alternative to passing storageAccountKey
+#     # - name: storageConnectionString
+#     #   value: "DefaultEndpointsProtocol=https;AccountName=<account>;AccountKey=<account-key>"
+
+

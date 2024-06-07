@@ -1,0 +1,32 @@
+{
+    "pools": [
+        {
+            "name": "pool1",
+            "description": "pool1 description",
+            "endpoints": [
+                {
+                    "url": "https://<your-open-ai-instance>.openai.azure.com/openai",
+                    "api-key": "yourapi-key"
+                },
+                {
+                    "url": "https://<your-open-ai-instance>.openai.azure.com/openai",
+                    "api-key": "your-api-key"
+                }
+            ]
+        },
+        {
+            "name": "pool2",
+            "description": "pool2 description",
+            "endpoints": [
+                {
+                    "url": "https://<your-open-ai-instance>.openai.azure.com/openai",
+                    "api-key": "your-api-key"
+                },
+                {
+                    "url": "https://<your-open-ai-instance>.openai.azure.com/openai",
+                    "api-key": "your-api-key"
+                }
+            ]
+        }
+    ]
+}

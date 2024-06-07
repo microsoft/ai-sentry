@@ -1,0 +1,48 @@
+# pull official base image
+FROM python:3.11.3-slim-buster as build
+
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends gcc build-essential bash
+
+WORKDIR /app
+
+RUN python -m venv /app/venv
+ENV PATH="/app/venv/bin:$PATH"
+
+COPY worker/requirements.txt .
+RUN pip install --upgrade pip 
+RUN pip install -r requirements.txt
+
+FROM python:3.11.3-slim-buster
+
+RUN groupadd -g 999 python && \
+    useradd -r -u 999 -g python python
+
+RUN mkdir /app && chown python:python /app
+WORKDIR /app
+
+COPY --chown=python:python --from=build /app/venv ./venv
+
+RUN mkdir /worker
+COPY --chown=python:python worker/ /app/worker/
+
+RUN mkdir /utils
+COPY --chown=python:python utils/ /app/utils/
+
+COPY /asgi_worker.py /app/asgi_worker.py
+WORKDIR /app
+
+
+# Copy the certificate from your host to your docker image
+COPY /utils/combined-cert.crt /usr/local/share/ca-certificates/combined_cert.crt
+
+# Update the CA certificates
+RUN apt-get update && \
+    apt-get install -y ca-certificates && \
+    update-ca-certificates
+
+USER 999
+
+ENV PATH="/app/venv/bin:$PATH"
+
+CMD ["hypercorn", "--bind", "0.0.0.0:7000", "asgi_worker:app"]

@@ -1,0 +1,15 @@
+@resource_name = localhost:6124
+@deployment_name = text-embedding-ada-002
+@api_key = {{$dotenv AOAI_API_KEY}}
+
+###‰
+POST http://{{resource_name}}/openai/deployments/{{deployment_name}}/embeddings?api-version=2024-02-01 HTTP/1.1
+Content-Type: application/json
+api-key: {{api_key}}
+ai-sentry-backend-pool:pool1
+ai-sentry-consumer:embedding-automated-test1
+ai-sentry-log-level:PII_STRIPPING_ENABLED
+
+{
+  "input": "Sample Document goes here"
+}

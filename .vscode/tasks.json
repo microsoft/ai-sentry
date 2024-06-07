@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "facadeapp-up",
+            "type": "daprd",
+            "appId": "facadeapp",
+            "metricsPort": 9090,
+            "enableHealthCheck": false
+        },
+        {
+            "label": "facadeapp-down",
+            "type": "daprd-down",
+            "appId": "facadeapp"
+        },
+        {
+            "label": "logger-up",
+            "type": "daprd",
+            "appId": "aoai-cosmosdb-logging-processor",
+            "metricsPort": 9091
+        },
+        {
+            "label": "logger-down",
+            "type": "daprd-down",
+            "appId": "aoai-cosmosdb-logging-processor"
+        }
+   ]
+}

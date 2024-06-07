@@ -1,0 +1,19 @@
+version: 1
+common:
+  resourcesPath: ../deploy/local/components
+apps:
+  - appID: ai-sentry-facade-entry
+    appDirPath: ./
+    enableAppHealthCheck: false
+    appPort: 6124
+    command: ["python3", "asgi_facade.py"]
+
+  - appID: aoai-cosmosdb-logging-processor
+    appDirPath: ./
+    appPort: 6001
+    command: ["python3", "asgi_worker.py"]
+
+  - appID: aoai-cosmosdb-summary-logging-processor22
+    appDirPath: ./
+    appPort: 6002
+    command: ["python3", "asgi_summary_worker.py"]

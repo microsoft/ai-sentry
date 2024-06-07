@@ -1,0 +1,40 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: cosmosdb-log
+spec:
+  type: bindings.azure.cosmosdb
+  version: v1
+  initTimeout: 5m
+  metadata:
+  - name: url
+    value: https://<your-cosmos-db>.documents.azure.com:443/
+  - name: masterKey
+    value: 
+  - name: database
+    value: request-logs
+  - name: collection
+    value: logs
+  - name: partitionKey
+    value: "LogId"
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: summary-log
+spec:
+  type: bindings.azure.cosmosdb
+  version: v1
+  initTimeout: 5m
+  metadata:
+  - name: url
+    value: https://<your-cosmos-db>.documents.azure.com:443/
+  - name: masterKey
+    value: 
+  - name: database
+    value: summary-logs
+  - name: collection
+    value: logs
+  - name: partitionKey
+    value: "openai_response_id"
+# ---

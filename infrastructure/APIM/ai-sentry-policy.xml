@@ -1,0 +1,52 @@
+<policies>
+    <inbound>
+        <base />
+        <set-variable name="ai-sentry" value="{{route-to-ai-sentry}}" />
+        <rate-limit-by-key calls="300" renewal-period="15" counter-key="@(context.Request.Headers.GetValueOrDefault("api-key", "default-value"))" />
+        <choose>
+            <when condition="@((String)context.Variables["ai-sentry"]=="true")">
+                <!-- Route to openai via AI-Sentry -->
+                <!-- Add Ai-sentry specific header -->
+                <set-header name="ai-sentry-consumer" exists-action="override">
+                    <value>aisentry</value>
+                </set-header>
+                <set-header name="ai-sentry-log-level" exists-action="override">
+                    <value>COMPLETE</value>
+                </set-header>
+                <set-header name="Ai-Sentry-Backend-Pool" exists-action="override">
+                    <value>gpt-4</value>
+                </set-header>
+                <set-backend-service backend-id="be-aisentry" />
+            </when>
+            <otherwise>
+                <!-- bypass Ai-Sentry and go straight to openAI backend -->
+                <set-backend-service backend-id="be-openai" />
+            </otherwise>
+        </choose>
+        <cors allow-credentials="false">
+            <allowed-origins>
+                <origin>*</origin>
+            </allowed-origins>
+            <allowed-methods>
+                <method>GET</method>
+                <method>POST</method>
+            </allowed-methods>
+            <allowed-headers>
+                <header>api-key</header>
+                <header>content-type</header>
+            </allowed-headers>
+        </cors>
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <set-header name="Ai-Sentry-Backend-Pool" exists-action="override">
+            <value>@((String)context.Variables["ai-sentry"])</value>
+        </set-header>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>

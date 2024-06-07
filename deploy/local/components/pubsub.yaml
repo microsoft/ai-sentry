@@ -1,0 +1,58 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: openaipubsub
+spec:
+  type: pubsub.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: localhost:6379
+  - name: redisPassword
+    value: ""
+  - name: queueDepth
+    value: "5"
+  - name: concurrency
+    value: "3"
+
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: openaipubsub-old
+spec:
+  type: pubsub.azure.eventhubs
+  version: v1
+  metadata:
+    # Either connectionString or eventHubNamespace is required
+    # Use connectionString when *not* using Microsoft Entra ID
+    - name: connectionString
+      value: ""
+    # Use eventHubNamespace when using Microsoft Entra ID
+    # - name: eventHubNamespace
+    #   value: "namespace"
+    - name: consumerID # Optional. If not supplied, the runtime will create one.
+      value: "ai-sentry-logger"
+    - name: enableEntityManagement
+      value: "false"
+    # The following four properties are needed only if enableEntityManagement is set to true
+    # - name: resourceGroupName
+    #   value: "test-rg"
+    # - name: subscriptionID
+    #   value: "value of Azure subscription ID"
+    # - name: partitionCount
+    #   value: "1"
+    # - name: messageRetentionInDays
+    #   value: "3"
+    # Checkpoint store attributes
+    - name: storageAccountName
+      value: ""
+    - name: storageAccountKey
+      value: ""
+    - name: storageContainerName
+      value: "ai-sen-checkpoints"
+    # Alternative to passing storageAccountKey
+    # - name: storageConnectionString
+    #   value: "DefaultEndpointsProtocol=https;AccountName=<account>;AccountKey=<account-key>"
+
+

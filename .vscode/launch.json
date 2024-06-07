@@ -1,0 +1,26 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+          {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "AI-SENTRY Facade",
+            "program": "${workspaceFolder}/aisentry/asgi_facade.py",
+            "console": "integratedTerminal",
+            "preLaunchTask": "facadeapp-up",
+            "postDebugTask": "facadeapp-down"
+          },
+          {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "comsosDB logger with Dapr",
+            "program": "${workspaceFolder}/aisentry/worker/cosmos_logger.py",
+            "console": "integratedTerminal",
+            "preLaunchTask": "logger-up",
+            "postDebugTask": "logger-down"
+          }
+    ]
+}
