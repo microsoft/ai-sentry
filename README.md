@@ -30,8 +30,7 @@ The following environment variables need to exist. How you feed them in is up to
 
 | Name | Value |
 | -------- | -------- |
-|  AI-SENTRY-ENDPOINT-CONFIG  | Example JSON value is located [here](/content/documentation/ai-sentry-config.json). This is used to map openai endpoints / deployments - so that when we are load balancing we are hitting group of same openAI models from the pool.  You can leverage the following [script](scripts/create-escaped-json.ps1) to help you generate JSON escaped string of this JSON.
-|
+|  AI-SENTRY-ENDPOINT-CONFIG  | Example JSON value is located [here](/content/documentation/ai-sentry-config.json). This is used to map openai endpoints / deployments - so that when we are load balancing we are hitting group of same openAI models from the pool.  You can leverage the following [script](scripts/create-escaped-json.ps1) to help you generate JSON escaped string of this JSON.|
 |AI-SENTRY-LANGUAGE-KEY| your Congnitive Services General API Key|
 |AI-SENTRY-LANGUAGE-ENDPOINT| your language text anlaytics or general service endpoint url|
 
