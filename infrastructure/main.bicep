@@ -161,6 +161,72 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:0.5.4' = 
   }
 }
 
+// 3.1 Add CosmosDB Containers
+
+module cosmosDbFulllogsContainer 'br/public:avm/res/document-db/container:0.5.4' = {
+  name: '${uniqueString(deployment().name)}-cosmosDbFullLogsContainerCreation'
+  params: {
+    // Required parameters
+    databaseAccountName: databaseAccount.outputs.databaseAccountName
+    databaseName: 'ai-sentry'
+    containerName: 'request-logs'
+    partitionKeyPath: '/LogId'
+    throughput: 400
+    // Non-required parameters
+    indexingPolicy: {
+      automatic: true
+      includedPaths: [
+        {
+          path: '/*'
+          indexes: [
+            {
+              kind: 'Range'
+              dataType: 'Number'
+            }
+            {
+              kind: 'Range'
+              dataType: 'String'
+            }
+          ]
+        }
+      ]
+    }
+    tags: tags
+  }
+}
+
+module cosmosDbSummaryContainer 'br/public:avm/res/document-db/container:0.5.4' = {
+  name: '${uniqueString(deployment().name)}-cosmosDbContainersCreation'
+  params: {
+    // Required parameters
+    databaseAccountName: databaseAccount.outputs.databaseAccountName
+    databaseName: 'ai-sentry'
+    containerName: 'summary-logs'
+    partitionKeyPath: '/LogId'
+    throughput: 400
+    // Non-required parameters
+    indexingPolicy: {
+      automatic: true
+      includedPaths: [
+        {
+          path: '/*'
+          indexes: [
+            {
+              kind: 'Range'
+              dataType: 'Number'
+            }
+            {
+              kind: 'Range'
+              dataType: 'String'
+            }
+          ]
+        }
+      ]
+    }
+    tags: tags
+  }
+}
+
 // 4. Create OpenAI resources
 module openAI 'open-ai/main.bicep' = {
   name: '${uniqueString(deployment().name)}-openAICreation'
