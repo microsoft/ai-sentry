@@ -1,0 +1,89 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "environmentType": {
+        "value": "dev"
+      },
+      "tags": {
+        "value": {
+          "Environment": "dev",
+          "Role": "ai-sentry"
+        }
+      },
+      "aksName": {
+        "value": "aisentryaks"
+      },
+      "aksPrimaryAgentPoolProfile": {
+        "value": [
+          {
+            "count": 1,
+            "mode": "System",
+            "name": "systempool",
+            "vmSize": "Standard_B2s"
+          }
+        ]
+      },
+      "containerRegistryName": {
+        "value": "aisentryacr001"
+      },
+      "cosmosDbName": {
+        "value": "aisentrycosmodb001"
+      },
+      "capabilitiesToAdd": {
+        "value": [
+          "EnableServerless",
+          "EnableGremlin",
+          "DisableRateLimitingResponses"
+        ]
+      },
+      "cosmosDbLocations": {
+        "value": [
+          {
+            "failoverPriority": 0,
+            "isZoneRedundant": false,
+            "locationName": "australiaeast"
+          }
+        ]
+      },
+      "openAiName": {
+        "value": "aisentryopenai"
+      },
+      "openAiLocation": {
+        "value": "australiaeast"
+      },
+      "openAiSku": {
+        "value": "S0"
+      },
+      "modelDeploymentConfig": {
+        "value": [
+          {
+            "name": "text-embedding-ada-002",
+            "version": "2",
+            "sku": "Standard",
+            "capacity": 1,
+            "raiPolicyName": ""
+          },
+          {
+            "name": "gpt-35-turbo",
+            "version": "0613",
+            "sku": "Standard",
+            "capacity": 1,
+            "raiPolicyName": ""
+          }
+        ]
+      },
+      "apimName": {
+        "value": "aisentryapim001"
+      },
+      "apimPublisherEmail": {
+        "value": "publisher@email.com"
+      },
+      "apimPublisherName": {
+        "value": "APIM Publisher"
+      },
+      "apimSku": {
+        "value": "Developer"
+      }
+    }
+  }
