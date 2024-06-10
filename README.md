@@ -28,11 +28,11 @@ Because AI-Sentry uses DAPR; the technology choices for log persistence, and mes
 
 The following environment variables need to exist. How you feed them in is up to you - i.e. Kubernetes secrets, configmaps, etc...
 
-| Name | Value |
-| -------- | -------- |
-|  AI-SENTRY-ENDPOINT-CONFIG  | Example JSON value is located [here](/content/documentation/ai-sentry-config.json). This is used to map openai endpoints / deployments - so that when we are load balancing we are hitting group of same openAI models from the pool.  Make sure to include /openai in your endpoint url configuration. You can leverage the following [script](scripts/create-escaped-json.ps1) to help you generate JSON escaped string of this JSON.|
-|AI-SENTRY-LANGUAGE-KEY| your Congnitive Services General API Key|
-|AI-SENTRY-LANGUAGE-ENDPOINT| your language text anlaytics or general service endpoint url|
+| Name | Value | Component |
+| -------- | -------- | -------- |
+|  AI-SENTRY-ENDPOINT-CONFIG  | Example JSON value is located [here](/content/documentation/ai-sentry-config.json). This is used to map openai endpoints / deployments - so that when we are load balancing we are hitting group of same openAI models from the pool.  Make sure to include /openai in your endpoint url configuration. You can leverage the following [script](scripts/create-escaped-json.ps1) to help you generate JSON escaped string of this JSON.|Facade App |
+|AI-SENTRY-LANGUAGE-KEY| your Congnitive Services General API Key| CosmosDB Worker |
+|AI-SENTRY-LANGUAGE-ENDPOINT| your language text anlaytics or general service endpoint url| CosmosDB Worker |
 
 
 ## Consumer Configuration
@@ -56,43 +56,6 @@ For more information on setting up AI-Sentry in your environment please follow t
 - [CosmosDB Logging Schema](/content/documentation/ComsosDB-LoggingSchema.md)
 
 - [Summary Logging Schema](/content/documentation/SummaryLog-schema.md)
-
-
-
-## Running locally
-```
-# Need to move this logic into dockerfile scripts for workers using cognitive services
-openssl x509 -in "/Users/ariannevjestic/Downloads/_.cognitive.microsoft.com.cer" -out "/Users/ariannevjestic/Downloads/cogcerts/_.cognitive.microsoft.com.pem" -outform PEM
-openssl x509 -in "/Users/ariannevjestic/Downloads/2.cer" -out "/Users/ariannevjestic/Downloads/cogcerts/DigiCert_SHA2 Secure_ServerCA.pem" -outform PEM
-openssl x509 -in "/Users/ariannevjestic/Downloads/1.cer" -out "/Users/ariannevjestic/Downloads/1.pem" -outform PEM
-cat _.cognitive.microsoft.com.pem middle.pem cDigiCertGlobalRootCA.pem > combined_cert.pem
-openssl x509 -outform der -in combined_cert -out combined-cert.crt
-
-REQUESTS_CA_BUNDLE=/Users/ariannevjestic/Downloads/cogservices.pem
-
-#check for python env variable
-
-cd ./aoaifacadeapp
-dapr run -f dapr.yaml
-```
-
-
-## Running individual apps:
-
-### FacadeApp API:
-```
-dapr run --app-id facade-entry --app-port 6124 python3 aoaifacadeapp.py --resources-path components --log-level info
-```
-
-### CosmosDB Worker:
-
-```
-dapr run --app-id oai-cosmosdb-logging-processor --app-port 3001 python3 ./workers/CosmosDBLogging/app.py --resources-path components --log-level info
-```
-
-
-
-
 
 
 ## Contributing
