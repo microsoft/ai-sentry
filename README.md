@@ -6,17 +6,17 @@
 *Ai-Sentry* is transparent python + DAPR based pluggable Generative AI Facade layer, designed to support the following features for large enterprises developing and operating Generative AI solutions:
 
 - Cross charge back on token usage across different openAI consumers
-- Request/Response Logging with ability to toggle PII stripping of information. This level of logging is useful for many things such as legal compliance as well as assesing and replaying back requerst/responses against newer modesl to help you deal with model upgrades without affecting your exisitng users.
-- Smarter load balancing by taking into account Azure openAI's load metrics
-- Support streaming and non streaming responses
-- Extensibility of custom adapters to help you deal with SDK / API deprecations from client side - so you can provide backwards compatibility.
+- Request/Response async based logging with ability to toggle PII stripping of information. This level of logging is useful for many things such as legal compliance as well as assessing and replaying back request/responses against newer models to help you deal with model upgrades without affecting your existing users.
+- Smarter load balancing by taking into account Azure openAI's response header load metrics and pooling of multi backends with same model capabilities
+- Support streaming and non streaming responses (including logging of these)
+- Extensibility of custom adapters to help you deal with SDK / API deprecations from client side - so you can provide backwards compatibility if needed.
 
 
 AI-Sentry is not designed to replace existing API Gateway solutions such as Azure APIM - rather it is designed to sit between API Gateway and the openAI endpoints - providing ultimate control for your openAI solutions.
 
-We try to perform heavy processing outside of the direct HTTP calls pipeline to minimise latency to the consumers and rely on DAPR side cars and Pub / Sub to perform the work asynchronously.
+We try to perform heavy processing outside of the direct HTTP calls pipeline to minimise latency to the consumers and rely on DAPR side cars and Pub / Sub patterns to perform the work asynchronously.
 
-Because AI-Sentry uses DAPR the technology choices for log persistence, and message brokers is swappable out via DAPR's native components. Our example uses REDIS and Event Hubs as the message broker for PUB/SUB, and CosmosDB as the Log persistence store.
+Because AI-Sentry uses DAPR; the technology choices for log persistence, and message brokers is swappable out via DAPR's native [components](https://docs.dapr.io/concepts/components-concept/). Our example uses REDIS and Event Hubs as the message broker for PUB/SUB, and CosmosDB as the Log persistence store.
 
 ## High Level Design
 
@@ -30,10 +30,9 @@ The following environment variables need to exist. How you feed them in is up to
 
 | Name | Value |
 | -------- | -------- |
-|  AI-SENTRY-ENDPOINT-CONFIG  | Example JSON value is located [here](/content/documentation/ai-sentry-config.json). This is used to map openai endpoints / deployments - so that when we are load balancing we are hitting group of same openAI models from the pool.  You can leverage the following [script](scripts/create-escaped-json.ps1) to help you generate JSON escaped string of this JSON.|
+|  AI-SENTRY-ENDPOINT-CONFIG  | Example JSON value is located [here](/content/documentation/ai-sentry-config.json). This is used to map openai endpoints / deployments - so that when we are load balancing we are hitting group of same openAI models from the pool.  Make sure to include /openai in your endpoint url configuration. You can leverage the following [script](scripts/create-escaped-json.ps1) to help you generate JSON escaped string of this JSON.|
 |AI-SENTRY-LANGUAGE-KEY| your Congnitive Services General API Key|
 |AI-SENTRY-LANGUAGE-ENDPOINT| your language text anlaytics or general service endpoint url|
-
 
 
 ## Consumer Configuration
@@ -46,11 +45,19 @@ Whatever you front AI-Sentry with e.g. Azure APIM, some other API gateway techno
 | ai-sentry-log-level | This toggles logging level for the actual consumer. Accepted values are: COMPLETE, PII_STRIPPING_ENABLED or DISABLED |
 |ai-sentry-backend-pool| Provide the name of the pool from the AI-SENTRY-ENDPOINT-CONFIG configuration. E.g. Pool1
 
+## Getting started
 
-For more information on setting up AI-Sentry in your enviornment please follow the following detailed sections.
+For more information on setting up AI-Sentry in your environment please follow the following detailed sections.
 
+- [Setting up CosmosDB dbs/table](/content/documentation/CosmosDBSetup.md)
 
 - [Setting up AI-Sentry on AKS](/content/documentation/AKSDeployment.md)
+
+- [CosmosDB Logging Schema](/content/documentation/ComsosDB-LoggingSchema.md)
+
+- [Summary Logging Schema](/content/documentation/SummaryLog-schema.md)
+
+
 
 ## Running locally
 ```

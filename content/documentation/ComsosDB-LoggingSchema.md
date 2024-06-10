@@ -1,5 +1,6 @@
 # Logging Schema
 
+Below you will find the output schema for CosmosDB logging. This is usefull for long term retention, legal requirements as well as model re-evaluation input/output to test how well other models are performing before cutting over.
 
 | Property | Description |
 | --- | --- |
@@ -8,9 +9,9 @@
 | `headers` | An object containing various headers related to the event. |
 | `params` | An object containing parameters related to the event. |
 | `request_body` | An object containing the request body of the event. |
-| `response_body` | An object containing the response body of the event. |
+| `response_body` | An object containing the response body of the event. For streaming responses we truncate the repsonse body purely down to the response text|
 | `sentry_ai_headers` | An object containing headers related to Sentry AI. |
-| `usage` | An object containing usage statistics. |
+| `usage` | An object containing usage statistics.3 properties are included here: completion_tokens, prompt_tokens, and total_tokens.|
 | `model` | The model used for the event. |
 | `openai_response_id` | The ID of the OpenAI response. |
 | `LogId` | The log ID of the event. |
@@ -29,12 +30,12 @@ JSON definition example:
         "is_Streaming": false,
         "headers": {
             "Remote-Addr": "10.224.0.5",
-            "Api-Key": "82c01474c9e540d1ae3f761d7d7e794b",
+            "Api-Key": "",
             "Arianwashere": "dfsdbgsdgsdgsdgs",
             "Ai-Sentry-Consumer": "Product1",
             "Ai-Sentry-Log-Level": "COMPLETE",
-            "Content-Type": "application/json",
-            "Postman-Token": "d9cdb055-9a82-45f7-abb6-d97e6b63c862"
+            "Ai-Sentry-Backend-Pool": "pool1",
+            "Content-Type": "application/json"
         },
         "params": {
             "api-version": "2023-07-01-preview"
