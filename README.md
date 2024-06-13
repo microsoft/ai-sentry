@@ -58,6 +58,10 @@ For more information on setting up AI-Sentry in your environment please follow t
 - [Summary Logging Schema](/content/documentation/SummaryLog-schema.md)
 
 
+## Looking for dotnet based solution?
+
+Thankfully our colleauge Graeme Foster has published a dotnet version with similar feature sets. Please go and check it out: https://github.com/microsoft/aicentral
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
