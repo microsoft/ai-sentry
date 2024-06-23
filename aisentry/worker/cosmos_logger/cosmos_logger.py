@@ -18,11 +18,16 @@ from typing import List
 
 # Get log level from environment variable
 log_level = os.getenv('LOG-LEVEL', 'INFO').upper()
-
-# Set up the logger
-logging.basicConfig(level=getattr(logging, log_level))
 logger = logging.getLogger(__name__)
 app = Flask(__name__)
+
+# Set up the loggerl 
+logging.basicConfig(level=getattr(logging, log_level),
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    datefmt='%d-%m-%Y %H:%M:%S'
+                    )
+
+
 
 load_dotenv(".env", override=True)
 

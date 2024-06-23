@@ -20,15 +20,17 @@ from typing import List
 
 # Get log level from environment variable
 log_level = os.getenv('LOG-LEVEL', 'INFO').upper()
-
-# Set up the logger
-logging.basicConfig(level=getattr(logging, log_level))
-print(f"Log level is set to {log_level}")
-
 logger = logging.getLogger(__name__)
 app = Flask(__name__)
-load_dotenv(".env", override=True)
 
+# Set up the logger
+logging.basicConfig(level=getattr(logging, log_level),
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    datefmt='%d-%m-%Y %H:%M:%S'
+                    )
+logger.info(f"Log level is set to {log_level}")
+
+load_dotenv(".env", override=True)
 
 app_port = os.getenv('APP_PORT', '7001')
 
