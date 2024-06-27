@@ -67,4 +67,4 @@ urllib3==2.2.1
 Werkzeug==3.0.1
 wsproto==1.2.0
 yarl==1.9.4
-tiktoken==0.5.2
+tiktoken==0.7.0
