@@ -64,7 +64,7 @@ starlette==0.36.3
 tqdm==4.66.2
 typing_extensions==4.10.0
 urllib3==2.2.2
-Werkzeug==3.0.1
+Werkzeug==3.0.3
 wsproto==1.2.0
 yarl==1.9.4
 tiktoken==0.5.2
