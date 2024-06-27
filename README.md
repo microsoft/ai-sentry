@@ -44,7 +44,7 @@ Whatever you front AI-Sentry with e.g. Azure APIM, some other API gateway techno
 |ai-sentry-consumer| this can be any string - it is used to represent a consumer or a product that uses generative ai backend. We use this for logging purposes|
 | ai-sentry-log-level | This toggles logging level for the actual consumer. Accepted values are: COMPLETE, PII_STRIPPING_ENABLED or DISABLED |
 |ai-sentry-backend-pool| Provide the name of the pool from the AI-SENTRY-ENDPOINT-CONFIG configuration. E.g. Pool1|
-|ai-sentry-adapters| Provide list of adapter names you want to run through prior to sending out the request to openai endpoint. Example: ```["SampleApiRequestTransformer","adapter2.."]```
+|ai-sentry-adapters| Provide list of adapter names you want to run through prior to sending out the request to openai endpoint. Example: ```["SampleApiRequestTransformer","adapter2..."]```
 
 ## Getting started
 
