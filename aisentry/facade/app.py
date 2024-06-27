@@ -18,14 +18,19 @@ from dotenv import load_dotenv
 import os
 import tiktoken
 from utils.ai_sentry_helpers import select_pool, init_endpoint_stats, getNextAvailableEndpointInfo, AISentryHeaders, openAILogObject,Usage, num_tokens_from_string
-
+from adapters.adapters import return_adapter
 
 # initial setup for logging / env variable loading
 log_level = os.getenv('LOG-LEVEL', 'INFO').upper()
 
 # Set up the logger
-logging.basicConfig(level=getattr(logging, log_level))
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=getattr(logging, log_level),
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    datefmt='%d-%m-%Y %H:%M:%S'
+                    )
+
+
 load_dotenv(".env", override=True)
 
 
@@ -65,6 +70,8 @@ async def kubeliveness():
 async def dapr_health_check():
     return '', 200
 
+
+
     # Service unavailable
     # return '', 503
 
@@ -96,6 +103,9 @@ async def catch_all(path):
         logger.info(f"ai-sentry headers used: {ai_sentry_headers_used}")
 
         pool_name = ai_sentry_headers_used.get('ai-sentry-backend-pool', None)
+        ai_sentry_adapters = ai_sentry_headers_used.get('ai-sentry-adapters', None)
+        ai_sentry_adapters_json = json.loads(ai_sentry_adapters)
+
         logger.info(f"Selected pool name: {pool_name}")
         
         # Create a new set of headers that exclude the ai-sentry specific headers which we will forward onto openAI endpoints
@@ -139,6 +149,22 @@ async def catch_all(path):
 
             # Create a httpx Request object
             timeout = httpx.Timeout(timeout=5.0, read=60.0)
+
+            # Apply the adapter transformation logic one by one
+            for adapter in ai_sentry_adapters_json:
+                logger.info(f"Applying transformation logic for adapter: {adapter}")
+                try:
+                    adapter_instance = return_adapter(request, adapter) 
+                except Exception as e:
+                    logger.error(f"Error loading adapter: {adapter} - {e}")
+                    return jsonify(error=str(e)), 500
+                path = adapter_instance.transform_path(path)
+                method = adapter_instance.transform_method(method)
+                body = adapter_instance.transform_body(body)
+                params = adapter_instance.transform_query_string(params)
+                openAI_request_headers = adapter_instance.transform_headers(openAI_request_headers)
+                logger.info(f"Transformation logic applied for adapter: {adapter}")
+
             req = client.build_request(method, path, content=body, headers=openAI_request_headers, params=params, timeout=timeout)
 
             logger.info(f"Forwarding {method} request to {req.url}")

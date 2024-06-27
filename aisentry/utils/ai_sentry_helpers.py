@@ -70,7 +70,7 @@ class AISentryHeaders:
 
     def validate_headers(self, headers):
         valid_headers = {}
-        required_headers = ["Ai-Sentry-Backend-Pool", "Ai-Sentry-Consumer", "Ai-Sentry-Log-Level"]
+        required_headers = ["Ai-Sentry-Backend-Pool", "Ai-Sentry-Consumer", "Ai-Sentry-Log-Level","Ai-Sentry-Adapters"]
 
         # for required_header in required_headers:
         #     logger.info(f"required_header: {required_header}")
@@ -90,6 +90,12 @@ class AISentryHeaders:
                     raise ValueError("ai-sentry-consumer cannot be an empty string")
                 else:
                     valid_headers[header.lower()] = value
+            if header.lower() == "ai-sentry-adapters":
+                if value == "":
+                    logger.info("ai-sentry-backend-adapters cannot be an empty string")
+                    raise ValueError("ai-sentry-adapters cannot be an empty string")
+                else:
+                    valid_headers[header.lower()] = value
             elif header.lower() in self.header_values:
                 if value not in self.header_values[header.lower()]:
                     raise ValueError(f"Invalid value {value} for header {header}, accepted values FULL, PII_STRIPPING_ENABLED, DISABLED")
@@ -99,40 +105,6 @@ class AISentryHeaders:
 
         return valid_headers
 
-
-    # def validate_headers(self, headers):
-    #     valid_headers = {}
-        
-    #     required_headers = ["ai-sentry-backend-pool", "ai-sentry-consumer", "ai-sentry-log-level"]
-    #     lower_case_headers = {k.lower(): v for k, v in headers}
-    #     logger.info(f"lower_case_headers: {lower_case_headers}")
-
-    #     print(dir(lower_case_headers))
-
-
-    #     for required_header in required_headers:
-    #         if required_header not in lower_case_headers:
-    #             raise ValueError(f"Missing required header {required_header}")
-
-
-    #     for header, value in headers:
-    #         if header.lower() == "ai-sentry-backend-pool":
-    #             if value == "":
-    #                 logger.info("ai-sentry-backend-pool cannot be an empty string")
-    #                 raise ValueError("ai-sentry-backend-pool cannot be an empty string")
-    #             else:
-    #                 valid_headers[header] = value
-    #         if header.lower() == "ai-sentry-consumer":
-    #             if value == "":
-    #                 raise ValueError("ai-sentry-consumer cannot be an empty string")
-    #             else:
-    #                 valid_headers[header] = value
-    #         elif header.lower() in self.header_values:
-    #             if value not in self.header_values[header.lower()]:
-    #                 raise ValueError(f"Invalid value {value} for header {header}, accepted values FULL, PII_STRIPPING_ENABLED, DISABLED")
-    #             else:
-    #                 valid_headers[header] = value
-    #     return valid_headers
 
   
 class openAISummaryLogObject:
