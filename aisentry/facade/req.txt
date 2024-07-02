@@ -125,8 +125,14 @@ rpds-py==0.13.2
 six==1.16.0
 sniffio==1.3.1
 starlette==0.36.3
+<<<<<<< HEAD
 tiktoken==0.5.2
 tqdm==4.66.3
+=======
+tiktoken==0.7.0
+ 
+tqdm==4.66.2
+>>>>>>> f4291a2 (adding in utc time, increasing httpx conneciton limit to None)
 types-pytz==2023.3.1.1
 typing_extensions==4.10.0
 tzdata==2023.3

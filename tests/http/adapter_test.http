@@ -1,0 +1,26 @@
+POST http://4.147.64.25/openai/deployments/gpt-4o/chat/completions?api-version=2023-07-01-preview HTTP/1.1
+ai-sentry-consumer: Product-car-review
+ai-sentry-log-level: PII_STRIPPING_ENABLED
+ai-sentry-backend-pool: pool1
+ai-sentry-adapters: ["SampleApiRequestTransformer"]
+Content-Type: application/json
+
+{
+    "messages": [
+        {
+            "role": "system",
+            "content": "you are a car reviewer studying japenese cars"
+        },
+        {
+            "role":"user",
+            "content":"Write a review on toyota yaris gr"
+        }
+    ],
+    "stream":true,
+    "max_tokens": 800,
+    "temperature": 0.7,
+    "frequency_penalty": 0,
+    "presence_penalty": 0,
+    "top_p": 0.95,
+    "stop": null
+}
