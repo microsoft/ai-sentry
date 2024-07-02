@@ -104,6 +104,8 @@ async def catch_all(path):
 
         pool_name = ai_sentry_headers_used.get('ai-sentry-backend-pool', None)
         ai_sentry_adapters = ai_sentry_headers_used.get('ai-sentry-adapters', None)
+        logger.info(f"ai-sentry adapters used: {ai_sentry_adapters}")
+
         ai_sentry_adapters_json = json.loads(ai_sentry_adapters)
 
         logger.info(f"Selected pool name: {pool_name}")
@@ -246,7 +248,12 @@ async def catch_all(path):
                     else:
                         endpoint_info["x-ratelimit-remaining-tokens"]=0
 
-                    utc_now = datetime.now(timezone.utc).isoformat()
+                    if proxy_streaming_response.headers.get("x-ratelimit-remaining-requests") is not None:
+                        endpoint_info["x-ratelimit-remaining-requests"]=response.headers["x-ratelimit-remaining-requests"]
+                    else:
+                        endpoint_info["x-ratelimit-remaining-tokens"]=0
+
+                    utc_now = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
                     request_body = json.loads(body) 
 
                     global model_name
@@ -338,7 +345,12 @@ async def catch_all(path):
                     else:
                         endpoint_info["x-ratelimit-remaining-tokens"]=0
 
-                    utc_now = datetime.now(timezone.utc).isoformat()
+                    if response.headers.get("x-ratelimit-remaining-requests") is not None:
+                        endpoint_info["x-ratelimit-remaining-requests"]=response.headers["x-ratelimit-remaining-requests"]
+                    else:
+                        endpoint_info["x-ratelimit-remaining-tokens"]=0
+
+                    utc_now = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
 
                     request_body = json.loads(body) 
                     response_json = json.loads(response_body)

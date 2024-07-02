@@ -37,7 +37,7 @@ def init_endpoint_stats(pools_info):
                 "x-ratelimit-remaining-tokens": '10000',
                 "x-retry-after-ms": '0',
                 "api-key": endpoint["api-key"],
-                "client": httpx.AsyncClient(base_url=endpoint["url"]),
+                "client": httpx.AsyncClient(base_url=endpoint["url"],limits=httpx.Limits(max_keepalive_connections=None, max_connections=None)),
                 "connection_errors_count": 0
             })
         pool_endpoints[pool["name"]] = transformed_endpoints
@@ -49,6 +49,7 @@ def select_pool(pool_endpoints, pool_name):
 async def getNextAvailableEndpointInfo(open_ai_endpoint_availability_stats):
     logger.info(f"open_ai_endpoint_availability_stats: {open_ai_endpoint_availability_stats}")
     remaining_requests = sorted(open_ai_endpoint_availability_stats ,key=lambda x: x['x-ratelimit-remaining-requests'], reverse=True)[0]
+    remaining_tokens = sorted(open_ai_endpoint_availability_stats ,key=lambda x: x['x-ratelimit-remaining-tokens'], reverse=True)[0]
     logger.info(f"Next available endpoint: {remaining_requests['url']}")
     return remaining_requests
 

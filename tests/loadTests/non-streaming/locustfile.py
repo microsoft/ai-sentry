@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv(".env", override=True)
 
-azure_endpoint = os.getenv("azure_endpoint", "http://localhost:6124/"), 
+azure_endpoint = os.getenv("azure_endpoint", "http://20.11.111.242/"), 
 api_key=os.getenv("api_key", "defaultKey"),  
 api_version=os.getenv("api_version", "2023-07-01-preview"),
 aoai_deployment_name = os.getenv("aoai_deployment_name", "chat"),
@@ -21,6 +21,7 @@ class OpenAIUser(HttpUser):
         "Content-Type": "application/json",
         "ai-sentry-consumer": "locustloadtest",
         "ai-sentry-backend-pool":"pool1",
+        "ai-sentry-adapters":"[\"SampleApiRequestTransformer\"]",
         "ai-sentry-log-level": ai_sentry_log_level,
         "api-key": "\"{}\"".format(api_key)
 
