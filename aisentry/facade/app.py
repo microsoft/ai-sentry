@@ -251,7 +251,7 @@ async def catch_all(path):
                     if proxy_streaming_response.headers.get("x-ratelimit-remaining-requests") is not None:
                         endpoint_info["x-ratelimit-remaining-requests"]=response.headers["x-ratelimit-remaining-requests"]
                     else:
-                        endpoint_info["x-ratelimit-remaining-tokens"]=0
+                        endpoint_info["x-ratelimit-remaining-requests"]=0
 
                     utc_now = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
                     request_body = json.loads(body) 
