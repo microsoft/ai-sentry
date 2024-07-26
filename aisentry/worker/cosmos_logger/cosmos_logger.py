@@ -53,24 +53,28 @@ async def oairequests_subscriber():
 
     logger.debug(f"Received a request to log data{data}")
 
-    response_body = data.get('response_body')
+    response_body = data.get('response_body', None)
     
-    consumer_id=data['sentry_ai_headers'].get('ai-sentry-consumer')
-    model_name=data.get('model','null')
-    openai_response_id=data.get('openai_response_id','null')
+    consumer_id=data['sentry_ai_headers'].get('ai-sentry-consumer', None)
+    log_level=data['sentry_ai_headers'].get('ai-sentry-log-level', None)
+    model_name=data.get('model',None)
+    openai_response_id=data.get('openai_response_id',None)
     date = datetime.datetime.fromisoformat(data.get('date_time_utc'))
     month_date = date.strftime("%m_%Y")
     
     logger.info('Consumer Product Id: %s', consumer_id)
     logger.info('LogId: %s', model_name)
+    logger.info('LogLevel: %s', log_level)
 
     data['LogId']=f"{model_name}_{consumer_id}_{month_date}"
     data['id']=openai_response_id
+    data['logLevel']=log_level
+    
     output_binding_data = json.dumps(data)
 
     data = {key.lower(): value for key, value in data.items()}
    
-    headers = data['sentry_ai_headers']
+    headers = data.get('sentry_ai_headers', None)
     
     
     if headers['ai-sentry-log-level'] == 'PII_STRIPPING_ENABLED':

@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 
 load_dotenv(".env", override=True)
 
-azure_endpoint = os.getenv("azure_endpoint", "http://ai-sentry-url/"), 
-api_key=os.getenv("api_key", "defaultkey"),  
+azure_endpoint = os.getenv("azure_endpoint", "http://4.195.10.69/"), 
+#api_key=os.getenv("api_key", "defaultkey"),  
 api_version=os.getenv("api_version", "2023-07-01-preview"),
-aoai_deployment_name = os.getenv("aoai_deployment_name", "chat")
+aoai_deployment_name = os.getenv("aoai_deployment_name", "gpt4o")
 
 # Non-Streaming Load Test
 class OpenAIUser(HttpUser):
@@ -18,7 +18,9 @@ class OpenAIUser(HttpUser):
         "Content-Type": "application/json",
         "ai-sentry-consumer": "locustloadtest",
         "ai-sentry-log-level": "PII_STRIPPING_ENABLED",
-        "api-key": "\"{}\"".format(api_key)
+        "ai-sentry-backend-pool": "pool1",
+        "ai-sentry-adapters": "[]"
+        #"api-key": "\"{}\"".format(api_key)
     }
 
     body = {

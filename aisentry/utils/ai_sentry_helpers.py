@@ -49,9 +49,9 @@ def select_pool(pool_endpoints, pool_name):
     return pool_endpoints.get(pool_name, None)
 
 async def getNextAvailableEndpointInfo(open_ai_endpoint_availability_stats):
-    logger.info(f"open_ai_endpoint_availability_stats: {open_ai_endpoint_availability_stats}")
-    remaining_requests = sorted(open_ai_endpoint_availability_stats ,key=lambda x: int(x['x-ratelimit-remaining-requests'], reverse=True))[0]
-    remaining_tokens = sorted(open_ai_endpoint_availability_stats ,key=lambda x: int(x['x-ratelimit-remaining-tokens'], reverse=True))[0]
+    logger.debug(f"open_ai_endpoint_availability_stats: {open_ai_endpoint_availability_stats}")
+    remaining_requests = sorted(open_ai_endpoint_availability_stats ,key=lambda x: int(x['x-ratelimit-remaining-requests']), reverse=True)[0]
+    remaining_tokens = sorted(open_ai_endpoint_availability_stats ,key=lambda x: int(x['x-ratelimit-remaining-tokens']), reverse=True)[0]
     logger.info(f"Next available endpoint: {remaining_requests['url']}")
 
     # Add a new key 'max_limit' to each dictionary that is the maximum of 'x-ratelimit-remaining-requests' and 'x-ratelimit-remaining-tokens'
@@ -143,9 +143,9 @@ class openAISummaryLogObject:
             'model': self.model,
             'timestamp': self.timestamp,
             'ProductId': self.product_id,
-            'promptTokens': self.usage['prompt_tokens'],
-            'responseTokens': self.usage['completion_tokens'],
-            'totalTokens': self.usage['total_tokens'],
+            'promptTokens': self.usage['prompt_tokens'] if self.usage is not None else None,
+            'responseTokens': self.usage.get('completion_tokens', None) if self.usage is not None else None,
+            'totalTokens': self.usage.get('total_tokens', None) if self.usage is not None else None ,
             'month_year': self.month_year
         }   
 
@@ -179,7 +179,7 @@ class openAILogObject:
         }
     
 class Usage:
-    def __init__(self, completion_tokens, prompt_tokens, total_tokens):
+    def __init__(self, completion_tokens=None, prompt_tokens=None, total_tokens=None):
         self.completion_tokens = completion_tokens
         self.prompt_tokens = prompt_tokens
         self.total_tokens = total_tokens

@@ -55,11 +55,11 @@ async def oairequests_subscriber():
 
     logger.debug(f"Received a request to log data{data}")
     
-    consumer_id=data['sentry_ai_headers'].get('ai-sentry-consumer')
-    model_name=data['model']
-    usage_info=data['usage']
-    openai_response_id=data['openai_response_id']
-    date = datetime.datetime.fromisoformat(data['date_time_utc'])
+    consumer_id=data['sentry_ai_headers'].get('ai-sentry-consumer', None)
+    model_name = data.get('model', None)
+    usage_info=data.get('usage', None)
+    openai_response_id=data.get('openai_response_id', None)
+    date = datetime.datetime.fromisoformat(data.get('date_time_utc', None))
     month_date = date.strftime("%m_%Y")
     
     logger.info('Consumer Product Id: %s', consumer_id)
