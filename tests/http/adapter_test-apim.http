@@ -1,0 +1,22 @@
+POST https://anevjes-apim-001.azure-api.net/openai-2024-02-01/deployments/gpt-4o/chat/completions?api-version=2024-02-15-preview HTTP/1.1
+Content-Type: application/json
+
+{
+    "messages": [
+        {
+            "role": "system",
+            "content": "you are a car reviewer studying japenese cars"
+        },
+        {
+            "role":"user",
+            "content":"Write a review on honda Integra DC2 Type R"
+        }
+    ],
+    "stream":false,
+    "max_tokens": 800,
+    "temperature": 0.7,
+    "frequency_penalty": 0,
+    "presence_penalty": 0,
+    "top_p": 0.95,
+    "stop": null
+}

@@ -3,7 +3,7 @@ import logging
 import uuid
 from datetime import datetime
 from dapr.clients import DaprClient
-import aiohttp
+import httpcore
 from enum import Enum
 from typing import Tuple
 from quart import Quart, jsonify, request, make_response
@@ -12,6 +12,7 @@ from urllib.request import urlopen
 from urllib.parse import urljoin
 from datetime import datetime, timezone
 import httpx
+from requests.exceptions import HTTPError
 import jwt
 import json
 from dotenv import load_dotenv
@@ -107,7 +108,6 @@ async def catch_all(path):
         logger.info(f"ai-sentry adapters used: {ai_sentry_adapters}")
 
         ai_sentry_adapters_json = json.loads(ai_sentry_adapters)
-
         logger.info(f"Selected pool name: {pool_name}")
         
         # Create a new set of headers that exclude the ai-sentry specific headers which we will forward onto openAI endpoints
@@ -115,7 +115,10 @@ async def catch_all(path):
         openAI_request_headers = {k: v for k, v in original_headers.items() if k.lower() not in exclude_headers}
 
         pool_endpoints = select_pool(open_ai_endpoint_availability_stats, pool_name)
-        logger.info(f"Selected pool: {pool_endpoints}")
+        
+        #strip api-key value if it is in use
+        pool_endpoints_without_api_key = [{k: v for k, v in endpoint.items() if k != 'api-key'} for endpoint in pool_endpoints]
+        logger.info(f"Selected pool: {pool_endpoints_without_api_key}")
 
         while not request_processed and current_retry <= max_retries:
             logger.info(f"Processing request retry#: {current_retry}")
@@ -178,20 +181,32 @@ async def catch_all(path):
                         # potentially recieve a timeout or a  HTTP > 499
                         response.raise_for_status()
                         current_retry += 1
+                    
+                    except httpcore.ConnectTimeout as timeout_err:
+                        logger.error(f"Connection timed out: {timeout_err}")
+                        return jsonify(error=str(timeout_err)), 500
+                    
+                    except HTTPError as http_err:
+                        logger.info(f"HTTP error occurred: {http_err}")
+                        if http_err.response.status_code == 429:  # 429 is the status code for Too Many Requests
+                            logger.info(f"Received 429 response from endpoint, retrying next available endpoint")
+                            current_retry += 1
+                            endpoint_info["connection_errors_count"]+=1
+                            request_processed = False
+                            continue
 
                     except Exception as e:
-                        # Connection Failures
-                        logger.error(f"An unexpected error occurred: {e}")
-                        # increment connection errors count for the endpoint
-                        endpoint_info["connection_errors_count"]+=1
-                        current_retry += 1
-                        continue
-                        
-                    if response.status_code == 429:
-                        logger.info(f"Received 429 response from endpoint, retrying next avilable endpoint")
-                        current_retry += 1
-                        continue
+                            # Connection Failures
+                            logger.error(f"An unexpected error occurred: {e}")
 
+                            if "429 Too Many Requests" in str(e):
+                                logger.info(f"Received 429 response from endpoint, retrying next available endpoint")
+                                current_retry += 1
+                                endpoint_info["connection_errors_count"]+=1
+                                request_processed = False
+                                continue
+
+                            return jsonify(error=str(e)), 500
 
                     
                     @stream_with_context
@@ -204,7 +219,7 @@ async def catch_all(path):
                         response_stream = []
                         global model_name
                         global openai_response_id
-
+                        
                         async for line in response.aiter_lines():                        
                             yield f"{line}\r\n"
                             if line.startswith("data: "):
@@ -223,6 +238,7 @@ async def catch_all(path):
                                         if delta.get('content') is not None:
                                             content_buffered.append(delta['content'])
 
+
                         content_buffered_string = "".join(content_buffered)
 
                         # Calculate the token count using tiktok library
@@ -234,13 +250,15 @@ async def catch_all(path):
 
                         logger.info(f"Streamed completion total Token count: {streaming_completion_token_count}")
                         logger.info(f"Streamed prompt total Token count: {streaming_prompt_token_count}")
-
-                    proxy_streaming_response = await make_response( stream_response(response))
-                    proxy_streaming_response_body = await proxy_streaming_response.data
-                    proxy_streaming_response.timeout = None
-                    proxy_streaming_response.status_code = response.status_code
-                    proxy_streaming_response.headers = {k: str(v) for k, v in response.headers.items()}
-
+                    try:
+                        proxy_streaming_response = await make_response( stream_response(response))
+                        proxy_streaming_response_body = await proxy_streaming_response.data
+                        proxy_streaming_response.timeout = None
+                        proxy_streaming_response.status_code = response.status_code
+                        proxy_streaming_response.headers = {k: str(v) for k, v in response.headers.items()}
+                    except Exception as e:
+                            logger.error(f"An error occurred while streaming response: {e}")
+                            return jsonify(error=str(e)), 500
 
                     # Record the stats for openAi endpoints
                     if proxy_streaming_response.headers.get("x-ratelimit-remaining-tokens") is not None:
@@ -252,6 +270,7 @@ async def catch_all(path):
                         endpoint_info["x-ratelimit-remaining-requests"]=response.headers["x-ratelimit-remaining-requests"]
                     else:
                         endpoint_info["x-ratelimit-remaining-tokens"]=0
+                        endpoint_info["x-ratelimit-remaining-requests"]=0
 
                     utc_now = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
                     request_body = json.loads(body) 
@@ -300,19 +319,6 @@ async def catch_all(path):
                     try:
                         response = await client.send(req, stream=False)
                         response.raise_for_status()
-                    # except httpx.TimeoutException:
-                    #     logger.error("A TimeoutException occurred.")
-                    # except httpx.ConnectTimeout:
-                    #     logger.error("A ConnectTimeout occurred.")
-                    # except httpx.ReadTimeout:
-                    #     logger.error("A ReadTimeout occurred.")
-                    # except httpx.HTTPStatusError:
-                    #     logger.error("A TooManyRequests occurred.")
-                    #     #increment connection errors count for the endpoint
-                    #     endpoint_info["connection_errors_count"]+=1
-                    #     current_retry += 1
-                    #     request_processed = False
-                    #     break
 
                     except Exception as e:
                         # Connection Failures
@@ -325,12 +331,13 @@ async def catch_all(path):
                             request_processed = False
                             continue
 
-                    # If response is a 429 Incremet retry count - to pick next aviable endpoint
+                    # If response is a 429 Increment retry count - to pick next aviable endpoint
                     if response.status_code == 429:
 
                         logger.info(f"Received 429 response from endpoint, retrying next available endpoint")
                         #endpoint_info["x-retry-after-ms"]=response.headers["x-retry-after-ms"]
                         current_retry += 1
+                        endpoint_info["connection_errors_count"]+=1
                         request_processed = False
                         continue
 
@@ -397,5 +404,3 @@ async def catch_all(path):
                     return proxy_response
         
         return jsonify(message=f"Request failed to process. Attempted to run: {current_retry},  against AI endpoint configuration unsucessfully"), 500
-
-

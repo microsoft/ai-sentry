@@ -7,7 +7,7 @@ load_dotenv(".env", override=True)
 client = AzureOpenAI(
   api_key = os.getenv("api_key"),  
   api_version = "2024-02-01",
-  azure_endpoint = os.getenv("azure_endpoint", "http://localhost:6124/"), 
+  azure_endpoint = os.getenv("azure_endpoint", "http://4.147.128.191/openai"), 
 )
 
 response = client.embeddings.create(
