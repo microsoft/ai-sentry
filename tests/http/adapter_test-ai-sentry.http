@@ -1,4 +1,4 @@
-POST http://4.200.49.22/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-15-preview HTTP/1.1
+POST http://4.147.31.58/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-15-preview HTTP/1.1
 ai-sentry-consumer: Product-car-review
 ai-sentry-log-level: PII_STRIPPING_ENABLED
 ai-sentry-backend-pool: pool1
