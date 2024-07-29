@@ -3,6 +3,7 @@ import logging
 import uuid
 from datetime import datetime
 from dapr.clients import DaprClient
+from azure.identity import DefaultAzureCredential
 import httpcore
 from enum import Enum
 from typing import Tuple
@@ -33,6 +34,11 @@ logging.basicConfig(level=getattr(logging, log_level),
 
 
 load_dotenv(".env", override=True)
+
+
+# os.environ["AZURE_CLIENT_ID"] = "your_client_id"
+# os.environ["AZURE_TENANT_ID"] = "your_tenant_id"
+# os.environ["AZURE_FEDERATED_TOKEN_FILE"] = "/var/run/secrets/tokens/azure-identity-token"
 
 
 logger.info("Starting Ai-Sentry Facade app")
@@ -130,9 +136,18 @@ async def catch_all(path):
                 logger.info("detected use of api-key header - will use this for authentication")
                 logger.debug(f"Swapping out api-key inside header with {endpoint_info['api-key']} value")
                 openAI_request_headers['Api-Key'] = endpoint_info['api-key']
-            else:
+
+            if endpoint_info['api-key'] is not None:
                 logger.info("No api-key header detected - will use the default api-key for authentication")
                 openAI_request_headers['Api-Key'] = endpoint_info['api-key']
+
+            else:
+                logger.info("No api-key config detected - will use oAuth to talk to openAI backend services.")
+                #Get Access Token from workload identity
+                credential = DefaultAzureCredential()
+                token = credential.get_token("https://cognitiveservices.azure.com/.default")
+                openAI_request_headers['Authorization'] = f"Bearer {token.token}"
+
             json_body = json.loads(body)
 
             if 'messages' in json_body:
