@@ -58,6 +58,8 @@ For more information on setting up AI-Sentry in your environment please follow t
 
 - [Summary Logging Schema](/content/documentation/SummaryLog-schema.md)
 
+- [Setting up workload identity - if you want to auth to openai backends via JWT instead of api keys](/content/documentation/Workload-identity-config.md)
+
 
 ## Looking for dotnet based solution?
 
