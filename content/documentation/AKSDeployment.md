@@ -48,7 +48,8 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm install sentry-redis bitnami/redis-cluster
 export REDIS_PASSWORD=$(kubectl get secret --namespace "default" sentry-redis-redis-cluster -o jsonpath="{.data.redis-password}" | base64 --decode)
 
- kubectl create secret generic redis --from-literal=redis-password=$REDIS_PASSWORD -n sentry-ai
+kubectl create namespace ai-sentry
+kubectl create secret generic redis --from-literal=redis-password=$REDIS_PASSWORD -n ai-sentry
 
 ```
 

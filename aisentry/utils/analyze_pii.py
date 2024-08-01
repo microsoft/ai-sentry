@@ -58,8 +58,6 @@ async def analyze_pii_async(input_text: List[str]) -> None:
             async for page in pages:
                 document_results.append(page)
 
-        # doc=""
-
         for doc, action_results in zip(chunk, document_results):
             for result in action_results:
 
@@ -71,21 +69,18 @@ async def analyze_pii_async(input_text: List[str]) -> None:
                         logger.debug(f".........Confidence Score: {pii_entity.confidence_score}")
                         if pii_entity.confidence_score >= 0.8 and pii_entity.category != "DateTime":
                             logger.debug(f"Removing PII entity: {pii_entity.text}, category: {pii_entity.category} from the logged payload")
-                            # if pii_entity.text in "\},]":
-                            #     doc = doc.replace(pii_entity.text, "*PII*\"},")
-                            #     logger.info(f"PII-Processing: Replacing PII entity: {pii_entity.text} with extra escaping")
-                            doc = doc.replace(pii_entity.text, "*PII*")
+                            doc = doc.replace(pii_entity.text, "PII_REDACTED")
 
                 elif result.is_error is True:
                     logger.error(f'PII-Processing: An error with code {result.error.code} and message {result.error.message}')
     
 
     #UNTOCHED 
-    if ": *PII*," in doc:
-        doc = doc.replace(": *PII*,", ":\"*PII*\",")
+    if ": PII_REDACTED," in doc:
+        doc = doc.replace(": PII_REDACTED,", ":\"PII_REDACTED\",")
 
-    if "*PII*," in doc:
-        doc = doc.replace("*PII*,", "*PII*\"")
+    if "PII_REDACTED," in doc:
+        doc = doc.replace("PII_REDACTED,", "PII_REDACTED\"")
 
     logger.info(f"PII stripping completed")
     return doc

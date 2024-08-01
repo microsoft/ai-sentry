@@ -35,12 +35,6 @@ logging.basicConfig(level=getattr(logging, log_level),
 
 load_dotenv(".env", override=True)
 
-
-# os.environ["AZURE_CLIENT_ID"] = "your_client_id"
-# os.environ["AZURE_TENANT_ID"] = "your_tenant_id"
-# os.environ["AZURE_FEDERATED_TOKEN_FILE"] = "/var/run/secrets/tokens/azure-identity-token"
-
-
 logger.info("Starting Ai-Sentry Facade app")
 app = Quart(__name__)
 
@@ -132,10 +126,10 @@ async def catch_all(path):
             client = endpoint_info["client"]
 
 
-            if openAI_request_headers.get('Api-Key') is not None:
-                logger.info("detected use of api-key header - will use this for authentication")
-                logger.debug(f"Swapping out api-key inside header with {endpoint_info['api-key']} value")
-                openAI_request_headers['Api-Key'] = endpoint_info['api-key']
+            # if openAI_request_headers.get('Api-Key') is not None:
+            #     logger.info("detected use of api-key header - will use this for authentication")
+            #     logger.debug(f"Swapping out api-key inside header with {endpoint_info['api-key']} value")
+            #     openAI_request_headers['Api-Key'] = endpoint_info['api-key']
 
             if endpoint_info['api-key'] is not None:
                 logger.info("No api-key header detected - will use the default api-key for authentication")

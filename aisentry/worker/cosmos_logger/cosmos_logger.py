@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify
 from cloudevents.http import from_http
 from requests.exceptions import HTTPError
-from azure.identity import DefaultAzureCredential
 from azure.core.exceptions import AzureError
 from dapr.clients import DaprClient
 from utils.analyze_pii import analyze_pii_async
+from utils.analyze_pii_openai import get_chat_pii_stripped_completion
 import logging
 import datetime
 import asyncio
@@ -15,6 +15,9 @@ import os
 import httpx
 import uuid
 from typing import List
+
+
+load_dotenv(".env", override=True)
 
 # Get log level from environment variable
 log_level = os.getenv('LOG-LEVEL', 'INFO').upper()
@@ -29,9 +32,10 @@ logging.basicConfig(level=getattr(logging, log_level),
 
 
 
-load_dotenv(".env", override=True)
-
 app_port = os.getenv('APP_PORT', '7000')
+
+# This can be either OPENAI or TEXTANALYTICS
+pii_stripping_service = os.getenv('PII_STRIPPING_SERVICE', 'OPENAI')
 
 # Register Dapr pub/sub subscriptions
 @app.route('/dapr/subscribe', methods=['GET'])
@@ -82,9 +86,34 @@ async def oairequests_subscriber():
 
         input_data: List[str] = []
         input_data.append(output_binding_data)
-        output_binding_data = await analyze_pii_async(input_data)
-        logger.debug(f"PII stripped data: {output_binding_data}") 
+        if pii_stripping_service == 'TEXTANALYTICS':
+            logger.debug(f"PII stripping service: {pii_stripping_service}")
+            output_binding_data = await analyze_pii_async(input_data)
+        
+        #OPENAI BASED PII Stripping
+        else:
+            logger.debug(f"PII stripping service: {pii_stripping_service}")
 
+            # Ensure a new event loop is created if the current one is closed
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_closed():
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+            if loop.is_running():
+                task = loop.create_task(get_chat_pii_stripped_completion(input_data))
+                result = loop.run_until_complete(task)
+            else:
+                result = loop.run_until_complete(get_chat_pii_stripped_completion(input_data))
+
+            print(result)
+            # output_binding_data = await get_chat_pii_stripped_completion(input_data)
+        
+        logger.debug(f"PII stripped data: {output_binding_data}")
 
 
     elif headers['ai-sentry-log-level'] == 'COMPLETE':

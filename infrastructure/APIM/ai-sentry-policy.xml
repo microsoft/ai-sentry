@@ -1,20 +1,40 @@
+<!--
+    - Policies are applied in the order they appear.
+    - Position <base/> inside a section to inherit policies from the outer scope.
+    - Comments within policies are not preserved.
+-->
+<!-- Add policies as children to the <inbound>, <outbound>, <backend>, and <on-error> elements -->
 <policies>
+    <!-- Throttle, authorize, validate, cache, or transform the requests -->
     <inbound>
         <base />
-        <set-variable name="ai-sentry" value="{{route-to-ai-sentry}}" />
+        <set-variable name="route-to-ai-sentry" value="{{route-to-ai-sentry}}" />
+        <set-variable name="ai-sentry" value="@((string)context.Variables["route-to-ai-sentry"])" />
+        <set-variable name="ai-sentry-callling-user" value="@{
+        var jwtToken = (context.Request.Headers != null) ? context.Request.Headers.GetValueOrDefault("Authorization","").AsJwt() : null;
+        var unique_name = jwtToken?.Claims.GetValueOrDefault("unique_name") ?? "unknown";
+        string first10Chars = originalString.Substring(0, 10);
+        return first10Chars;
+     }" />
+        <set-header name="ai-sentry-calling-user" exists-action="override">
+            <value>@((string)context.Variables.GetValueOrDefault("ai-sentry-callling-user"))</value>
+        </set-header>
         <rate-limit-by-key calls="300" renewal-period="15" counter-key="@(context.Request.Headers.GetValueOrDefault("api-key", "default-value"))" />
         <choose>
             <when condition="@((String)context.Variables["ai-sentry"]=="true")">
                 <!-- Route to openai via AI-Sentry -->
                 <!-- Add Ai-sentry specific header -->
                 <set-header name="ai-sentry-consumer" exists-action="override">
-                    <value>aisentry</value>
+                    <value>arian-test-caller</value>
                 </set-header>
                 <set-header name="ai-sentry-log-level" exists-action="override">
                     <value>COMPLETE</value>
                 </set-header>
                 <set-header name="Ai-Sentry-Backend-Pool" exists-action="override">
-                    <value>gpt-4</value>
+                    <value>pool1</value>
+                </set-header>
+                <set-header name="ai-sentry-adapters" exists-action="override">
+                    <value>["SampleApiRequestTransformer"]</value>
                 </set-header>
                 <set-backend-service backend-id="be-aisentry" />
             </when>
@@ -37,15 +57,15 @@
             </allowed-headers>
         </cors>
     </inbound>
+    <!-- Control if and how the requests are forwarded to services  -->
     <backend>
         <base />
     </backend>
+    <!-- Customize the responses -->
     <outbound>
-        <set-header name="Ai-Sentry-Backend-Pool" exists-action="override">
-            <value>@((String)context.Variables["ai-sentry"])</value>
-        </set-header>
         <base />
     </outbound>
+    <!-- Handle exceptions and customize error responses  -->
     <on-error>
         <base />
     </on-error>

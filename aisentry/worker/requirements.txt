@@ -46,6 +46,7 @@ msal==1.28.0
 msal-extensions==1.1.0
 multidict==6.0.5
 openai==1.14.2
+nest_asyncio==1.6.0
 packaging==24.0
 portalocker==2.8.2
 priority==2.0.0
