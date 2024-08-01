@@ -1,9 +1,9 @@
 param(
     [string]$version = "0.1.1",
-    [string]$containerRegistry = "ariantestacr001.azurecr.io"
+    [string]$containerRegistry = "anevjesacrdevtest.azurecr.io"
 )
 #Uncomment first line for very first time to set to the right acr context
-# az acr login --name ariantestacr001
+# az acr login --name anevjesacrdevtest
 Write-Host "Building AI-Sentry Facade:$version"
 docker build --platform linux/amd64 -t ai-sentry-facadeapp:$version -f Dockerfile.facade ../aisentry/
 docker tag ai-sentry-facadeapp:$version $containerRegistry/ai-sentry-facadeapp:$version

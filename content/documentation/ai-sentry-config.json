@@ -6,11 +6,11 @@
             "endpoints": [
                 {
                     "url": "https://<your-open-ai-instance>.openai.azure.com/openai",
-                    "api-key": "yourapi-key"
+                    "api-key": "yourapi-key" //If you simply set "api-Key": null the facade layer will leverage aks workload identity to connect to openAi backends.
                 },
                 {
                     "url": "https://<your-open-ai-instance>.openai.azure.com/openai",
-                    "api-key": "your-api-key"
+                    "api-key": "your-api-key" //If you simply set "api-Key": null the facade layer will leverage aks workload identity to connect to openAi backends.
                 }
             ]
         },
@@ -20,11 +20,11 @@
             "endpoints": [
                 {
                     "url": "https://<your-open-ai-instance>.openai.azure.com/openai",
-                    "api-key": "your-api-key"
+                    "api-key": "your-api-key" //If you simply set "api-Key": null the facade layer will leverage aks workload identity to connect to openAi backends.
                 },
                 {
                     "url": "https://<your-open-ai-instance>.openai.azure.com/openai",
-                    "api-key": "your-api-key"
+                    "api-key": "your-api-key" //If you simply set "api-Key": null the facade layer will leverage aks workload identity to connect to openAi backends.
                 }
             ]
         }

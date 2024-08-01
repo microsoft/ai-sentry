@@ -64,6 +64,7 @@ spec:
     metadata:
       labels:
         app: facadeapp
+        azure.workload.identity/use: "true"
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "facadeapp"
@@ -75,6 +76,8 @@ spec:
         dapr.io/app-health-probe-interval: "3"
         dapr.io/app-health-probe-timeout: "200"
         dapr.io/app-health-threshold: "2"
+        azure.workload.identity/inject-proxy-sidecar: "true"
+        azure.workload.identity/proxy-sidecar-port: "8000"
 
     spec:
       containers:
@@ -94,7 +97,7 @@ spec:
             failureThreshold: 3
           env:
           - name: "AI-SENTRY-ENDPOINT-CONFIG"
-            value: "{\"pools\":[{\"name\":\"pool1\",\"description\":\"pool1 description\",\"endpoints\":[{\"url\":\"https://youropenaiendpoint.openai.azure.com/openai\",\"api-key\":\"yourkey\"}]},{\"name\":\"pool2\",\"description\":\"pool2 description\",\"endpoints\":[{\"url\":\"https://youropenai.openai.azure.com/openai\",\"api-key\":\"yourkey\"},{\"url\":\"https://youropenai.openai.azure.com/openai\",\"api-key\":\"yourkey\"}]}]}"
+            value: "{\"pools\":[{\"name\":\"pool1\",\"description\":\"pool1 description\",\"endpoints\":[{\"url\":\"https://youropenaiendpoint.openai.azure.com/openai\",\"api-key\":\"yourkey or simply null\"}]},{\"name\":\"pool2\",\"description\":\"pool2 description\",\"endpoints\":[{\"url\":\"https://youropenai.openai.azure.com/openai\",\"api-key or simply null\":\"yourkey or simply null\"},{\"url\":\"https://youropenai.openai.azure.com/openai\",\"api-key or simply null\":\"yourkey\"}]}]}"
           - name: "LOG-LEVEL"
             value: "INFO"
 ---
@@ -141,6 +144,12 @@ spec:
               value: "your-key"
             - name: "LOG-LEVEL"
               value: "DEBUG"
+            - name: "PII_STRIPPING_SERVICE"
+              value: "OPENAI"
+            - name: PII_STRIPPING_OPENAI_ENDPOINT
+              value: "https://ptuopendeployment.openai.azure.com/"
+            - name: "PII_STRIPPING_OPENAI_API_KEY"
+              value: "yourapikeytoopenai / apim subscription key"
 ---
 #Summary Logger Logger
 kind: StatefulSet

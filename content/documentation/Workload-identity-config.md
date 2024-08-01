@@ -1,5 +1,10 @@
 # AKS Workload Identity setup
 
+## Enable Workload identity against existing AKS cluster
+```powershell
+az aks update --resource-group "aks-devtest-rg" --name "anevjes-aks-dev" --enable-oidc-issuer --enable-workload-identity
+```
+
 ## MI creation
 ```powershell
 az account set --subscription "subscriptionID"
@@ -31,7 +36,7 @@ export SERVICE_ACCOUNT_NAMESPACE="ai-sentry"
 ## OIDC Issuer url
 
 ```bash
-export AKS_OIDC_ISSUER="$(az aks show --name anevjes-aks --resource-group aks --query "oidcIssuerProfile.issuerUrl" -o tsv)"
+export AKS_OIDC_ISSUER="$(az aks show --name anevjes-aks-dev --resource-group aks-devtest-rg --query "oidcIssuerProfile.issuerUrl" -o tsv)"
 ```
 
 ## Create AKS Service Account
