@@ -35,8 +35,8 @@ def init_endpoint_stats(pools_info):
         for endpoint in pool["endpoints"]:
             transformed_endpoints.append({
                 "url": endpoint["url"],
-                "x-ratelimit-remaining-requests": '10000',
-                "x-ratelimit-remaining-tokens": '10000',
+                "x-ratelimit-remaining-requests": endpoint["x-ratelimit-remaining-requests"],
+                "x-ratelimit-remaining-tokens": endpoint["x-ratelimit-remaining-tokens"],
                 "x-retry-after-ms": '0',
                 "api-key": endpoint["api-key"],
                 "client": httpx.AsyncClient(base_url=endpoint["url"],limits=httpx.Limits(max_keepalive_connections=None, max_connections=None)),

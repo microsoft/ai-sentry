@@ -6,11 +6,9 @@
             "endpoints": [
                 {
                     "url": "https://<your-open-ai-instance>.openai.azure.com/openai",
-                    "api-key": "yourapi-key" //If you simply set "api-Key": null the facade layer will leverage aks workload identity to connect to openAi backends.
-                },
-                {
-                    "url": "https://<your-open-ai-instance>.openai.azure.com/openai",
-                    "api-key": "your-api-key" //If you simply set "api-Key": null the facade layer will leverage aks workload identity to connect to openAi backends.
+                    "api-key": null, //If you simply set "api-Key": null the facade layer will leverage aks workload identity to connect to openAi backends.,
+                    "x-ratelimit-remaining-requests": 1000,
+                    "x-ratelimit-remaining-tokens": 1000
                 }
             ]
         },
@@ -20,11 +18,15 @@
             "endpoints": [
                 {
                     "url": "https://<your-open-ai-instance>.openai.azure.com/openai",
-                    "api-key": "your-api-key" //If you simply set "api-Key": null the facade layer will leverage aks workload identity to connect to openAi backends.
+                    "api-key": "your-api-key", //If you simply set "api-Key": null the facade layer will leverage aks workload identity to connect to openAi backends.
+                    "x-ratelimit-remaining-requests": 1000,
+                    "x-ratelimit-remaining-tokens": 1000
                 },
                 {
                     "url": "https://<your-open-ai-instance>.openai.azure.com/openai",
-                    "api-key": "your-api-key" //If you simply set "api-Key": null the facade layer will leverage aks workload identity to connect to openAi backends.
+                    "api-key": "your-api-key",//If you simply set "api-Key": null the facade layer will leverage aks workload identity to connect to openAi backends.
+                    "x-ratelimit-remaining-requests": 1000,
+                    "x-ratelimit-remaining-tokens": 1000
                 }
             ]
         }
