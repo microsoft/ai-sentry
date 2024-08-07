@@ -97,7 +97,6 @@ async def catch_all(path):
         max_retries = 3
         current_retry = 0
         
-
         # pull out the ai-sentry specific headers - we use them further for worker processing options.
         ai_sentry_headers = AISentryHeaders()
         ai_sentry_headers_used = ai_sentry_headers.validate_headers(original_headers.items())
@@ -143,13 +142,20 @@ async def catch_all(path):
                 openAI_request_headers['Authorization'] = f"Bearer {token.token}"
 
             json_body = json.loads(body)
+            object_value = json_body.get("object")
+
+            if object_value == "assistant":
+                logger.info("Detected assistant request")
+                prompt_contents = None
+                prompt_contents_string = None
 
             if 'messages' in json_body:
                 prompt_contents = json_body['messages']
                 prompt_contents_string = json.dumps(prompt_contents)
+            
             else:
                 logger.info("Messages not found in json_body, assuming the request is an embedding request")
-                prompt_contents= json_body['input']
+                prompt_contents= json_body.get('input')
                 prompt_contents_string = json.dumps(prompt_contents)
             
             

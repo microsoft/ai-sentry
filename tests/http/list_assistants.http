@@ -1,0 +1,15 @@
+POST http://4.198.191.229/openai/assistants?api-version=2024-05-01-preview
+Content-Type: application/json
+Ai-Sentry-Consumer: Product-car-review
+Ai-Sentry-Log-Level: PII_STRIPPING_ENABLED
+Ai-Sentry-Backend-Pool: pool1
+Ai-Sentry-Adapters: []
+
+{
+
+  "instructions": "You are an AI assistant that can write code to help answer math questions.",
+  "tools": [
+    { "type": "code_interpreter" }
+  ],
+  "model": "gpt-4o"
+}
