@@ -147,7 +147,7 @@ async def catch_all(path):
             json_body = None
 
             if not decoded_body:
-                logger.error("Received an empty or None body")
+                logger.info("Received an empty or None body")
                 # Handle the empty or None body case here
                 json_body = {}
             else:
