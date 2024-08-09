@@ -1,5 +1,6 @@
-POST https://anevjes-apim-001.azure-api.net/openai-2024-02-01/deployments/gpt-4o/chat/completions?api-version=2024-02-15-preview HTTP/1.1
+POST https://anevjes-apim-dev.azure-api.net/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-15-preview HTTP/1.1
 Content-Type: application/json
+api-key: 13737537357353
 
 {
     "messages": [

@@ -1,0 +1,5 @@
+GET http://20.167.97.191/openai/threads/thread_58vrUKZ2LYSoGdVYk6WfXzxQ?api-version=2024-05-01-preview
+Ai-Sentry-Consumer: test-assistant
+Ai-Sentry-Log-Level: DISABLED
+Ai-Sentry-Backend-Pool: pool1
+Ai-Sentry-Adapters: []
