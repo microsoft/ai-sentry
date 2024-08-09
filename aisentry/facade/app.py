@@ -1,4 +1,4 @@
-
+\
 import logging
 import uuid
 from datetime import datetime
@@ -90,6 +90,7 @@ async def catch_all(path):
         method = request.method
         original_headers = request.headers
         params = request.args
+        body = None
         body = await request.get_data()
 
         # Request Processed variable
@@ -141,7 +142,18 @@ async def catch_all(path):
                 token = credential.get_token("https://cognitiveservices.azure.com/.default")
                 openAI_request_headers['Authorization'] = f"Bearer {token.token}"
 
-            json_body = json.loads(body)
+            
+            decoded_body = body.decode('UTF-8').strip()
+            json_body = None
+
+            if not decoded_body:
+                logger.error("Received an empty or None body")
+                # Handle the empty or None body case here
+                json_body = {}
+            else:
+                json_body = json.loads(decoded_body)
+
+            
             object_value = json_body.get("object")
 
             if object_value == "assistant":
@@ -373,8 +385,7 @@ async def catch_all(path):
                         endpoint_info["x-ratelimit-remaining-tokens"]=0
 
                     utc_now = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
-
-                    request_body = json.loads(body) 
+                    request_body = json_body   
                     response_json = json.loads(response_body)
 
                     #Extract the token count from the response

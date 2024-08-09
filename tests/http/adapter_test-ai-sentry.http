@@ -1,8 +1,9 @@
-POST http://4.147.31.58/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-15-preview HTTP/1.1
-ai-sentry-consumer: Product-car-review
-ai-sentry-log-level: PII_STRIPPING_ENABLED
-ai-sentry-backend-pool: pool1
-ai-sentry-adapters: ["SampleApiRequestTransformer"]
+POST http://20.167.97.191/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-15-preview HTTP/1.1
+Ai-Sentry-Consumer: Product-car-review
+Ai-Sentry-Log-Level: COMPLETE
+Ai-Sentry-Backend-Pool: pool1
+Ai-Sentry-Adapters: []
+ArianWasHere: aaaa
 Content-Type: application/json
 
 {
@@ -13,7 +14,7 @@ Content-Type: application/json
         },
         {
             "role":"user",
-            "content":"Write a review on toyota yaris gr"
+            "content":"Write a 3 sentence review on honda integra type r DC2"
         }
     ],
     "stream":true,

@@ -1,11 +1,11 @@
-@resource_name = 4.200.52.148
+@resource_name = 20.167.97.191
 @deployment_name = text-embedding-ada-002
-@api_key = {{$dotenv AOAI_API_KEY}}
+@api_key = {{$dotenv AOAI_API_KEY}}ct
 
 ###‰
 POST http://{{resource_name}}/openai/deployments/{{deployment_name}}/embeddings?api-version=2024-06-01 HTTP/1.1
 Content-Type: application/json
-api-key: {{api_key}}
+#api-key: {{api_key}}
 ai-sentry-backend-pool:pool1
 ai-sentry-consumer:embedding-automated-test1
 ai-sentry-log-level:PII_STRIPPING_ENABLED

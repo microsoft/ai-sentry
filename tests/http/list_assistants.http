@@ -1,4 +1,4 @@
-POST http://4.198.191.229/openai/assistants?api-version=2024-05-01-preview
+POST http://20.167.97.191/openai/assistants?api-version=2024-05-01-preview
 Content-Type: application/json
 Ai-Sentry-Consumer: Product-car-review
 Ai-Sentry-Log-Level: PII_STRIPPING_ENABLED
