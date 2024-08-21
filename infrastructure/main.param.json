@@ -17,18 +17,18 @@
       "aksPrimaryAgentPoolProfile": {
         "value": [
           {
-            "count": 1,
+            "count": 2,
             "mode": "System",
             "name": "systempool",
-            "vmSize": "Standard_B2s"
+            "vmSize": "Standard_D8ds_v5"
           }
         ]
       },
       "containerRegistryName": {
-        "value": "aisentryacr001"
+        "value": "vhxmaaisentryacr001"
       },
       "cosmosDbName": {
-        "value": "aisentrycosmodb001"
+        "value": "vhxmaaisentrycosmodb001"
       },
       "capabilitiesToAdd": {
         "value": [
@@ -47,7 +47,7 @@
         ]
       },
       "openAiName": {
-        "value": "aisentryopenai"
+        "value": "aisentry-openai"
       },
       "openAiLocation": {
         "value": "australiaeast"
@@ -63,18 +63,11 @@
             "sku": "Standard",
             "capacity": 1,
             "raiPolicyName": ""
-          },
-          {
-            "name": "gpt-35-turbo",
-            "version": "0613",
-            "sku": "Standard",
-            "capacity": 1,
-            "raiPolicyName": ""
           }
         ]
       },
       "apimName": {
-        "value": "aisentryapim001"
+        "value": "vhxmaaisentryapim"
       },
       "apimPublisherEmail": {
         "value": "publisher@email.com"

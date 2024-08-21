@@ -1,14 +1,14 @@
 param([Parameter(mandatory=$true, HelpMessage="Subscirption ID")]
 [string]
-$subscriptionId='eb51c20e-72d0-49ea-b7fc-2b0a23c73341',    
+$subscriptionId,    
 
 [Parameter(mandatory=$true, HelpMessage="Resource group name")]
 [string]
-$resourceGroupName='ai-sentry-rg',
+$resourceGroupName,
 
 [Parameter(mandatory=$true, HelpMessage="Location of resource group")]
 [string]
-$location='australiaeast')
+$location)
 
 $ProgressPreference = "SilentlyContinue"
 
