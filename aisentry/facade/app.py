@@ -71,8 +71,6 @@ async def kubeliveness():
 async def dapr_health_check():
     return '', 200
 
-
-
     # Service unavailable
     # return '', 503
 
@@ -105,7 +103,8 @@ async def catch_all(path):
 
         pool_name = ai_sentry_headers_used.get('ai-sentry-backend-pool', None)
         ai_sentry_adapters = ai_sentry_headers_used.get('ai-sentry-adapters', None)
-        x_aisentry_correlation = ai_sentry_headers_used.get('x-aisentry-correlation')
+        x_aisentry_correlation = ai_sentry_headers_used.get('x-aisentry-correlation', "00000000-0000-0000-0000-000000000000")
+        logger.info(f"correlation id used: {x_aisentry_correlation}")
 
         logger.info(f"ai-sentry adapters used: {ai_sentry_adapters}")
 
