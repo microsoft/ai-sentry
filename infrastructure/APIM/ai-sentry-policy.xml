@@ -20,6 +20,10 @@
         <set-header name="ai-sentry-calling-user" exists-action="override">
             <value>@((string)context.Variables.GetValueOrDefault("ai-sentry-callling-user"))</value>
         </set-header>
+        <trace source="Global APIM Policy" severity="information">
+            <message>@(String.Format("{0} | {1}", context.Api.Name, context.Variables["correlation-id"]))</message>
+            <metadata name="correlation-id" value="@((string)context.Variables["correlation-id"])" />
+        </trace>
         <rate-limit-by-key calls="300" renewal-period="15" counter-key="@(context.Request.Headers.GetValueOrDefault("api-key", "default-value"))" />
         <choose>
             <when condition="@((String)context.Variables["ai-sentry"]=="true")">
