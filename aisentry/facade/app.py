@@ -71,8 +71,6 @@ async def kubeliveness():
 async def dapr_health_check():
     return '', 200
 
-
-
     # Service unavailable
     # return '', 503
 
@@ -105,6 +103,9 @@ async def catch_all(path):
 
         pool_name = ai_sentry_headers_used.get('ai-sentry-backend-pool', None)
         ai_sentry_adapters = ai_sentry_headers_used.get('ai-sentry-adapters', None)
+        x_aisentry_correlation = ai_sentry_headers_used.get('x-aisentry-correlation', "00000000-0000-0000-0000-000000000000")
+        logger.info(f"correlation id used: {x_aisentry_correlation}")
+
         logger.info(f"ai-sentry adapters used: {ai_sentry_adapters}")
 
         ai_sentry_adapters_json = json.loads(ai_sentry_adapters)
@@ -188,7 +189,7 @@ async def catch_all(path):
                 try:
                     adapter_instance = return_adapter(request, adapter) 
                 except Exception as e:
-                    logger.error(f"Error loading adapter: {adapter} - {e}")
+                    logger.error(f"({x_aisentry_correlation}) #1 Error loading adapter: {adapter} - {e}")
                     return jsonify(error=str(e)), 500
                 path = adapter_instance.transform_path(path)
                 method = adapter_instance.transform_method(method)
@@ -210,7 +211,7 @@ async def catch_all(path):
                         current_retry += 1
                     
                     except httpcore.ConnectTimeout as timeout_err:
-                        logger.error(f"Connection timed out: {timeout_err}")
+                        logger.error(f"({x_aisentry_correlation}) #2 Connection timed out: {timeout_err}")
                         return jsonify(error=str(timeout_err)), 500
                     
                     except HTTPError as http_err:
@@ -224,7 +225,7 @@ async def catch_all(path):
 
                     except Exception as e:
                             # Connection Failures
-                            logger.error(f"An unexpected error occurred: {e}")
+                            logger.error(f"({x_aisentry_correlation}) #3 An unexpected error occurred: {e}")
 
                             if "429 Too Many Requests" in str(e):
                                 logger.info(f"Received 429 response from endpoint, retrying next available endpoint")
@@ -284,7 +285,7 @@ async def catch_all(path):
                         proxy_streaming_response.status_code = response.status_code
                         proxy_streaming_response.headers = {k: str(v) for k, v in response.headers.items()}
                     except Exception as e:
-                            logger.error(f"An error occurred while streaming response: {e}")
+                            logger.error(f"({x_aisentry_correlation}) #4 An error occurred while streaming response: {e}")
                             return jsonify(error=str(e)), 500
 
                     # Record the stats for openAi endpoints
@@ -337,7 +338,7 @@ async def catch_all(path):
                         request_processed = True
 
                     except Exception as e:
-                        logger.error(f"Error publishing to Dapr pub/sub: {e}")
+                        logger.error(f"({x_aisentry_correlation}) #5 Error publishing to Dapr pub/sub: {e}")
 
 
                     return proxy_streaming_response
@@ -351,12 +352,14 @@ async def catch_all(path):
                         # Connection Failures
                         if response is None or response.status_code > 499:
 
-                            logger.error(f"An unexpected error occurred: {e}")
+                            logger.error(f"({x_aisentry_correlation}) #6 An unexpected error occurred: {e}")
                             # increment connection errors count for the endpoint
                             endpoint_info["connection_errors_count"]+=1
                             current_retry += 1
                             request_processed = False
                             continue
+                        else:
+                            logger.error(f"({x_aisentry_correlation}) #7 An unexpected error occured: {e}")
 
                     # If response is a 429 Increment retry count - to pick next aviable endpoint
                     if response.status_code == 429:
@@ -425,7 +428,7 @@ async def catch_all(path):
                         request_processed = True
 
                     except Exception as e:
-                        logger.error(f"Error publishing to Dapr pub/sub: {e}")
+                        logger.error(f"({x_aisentry_correlation}) #8 Error publishing to Dapr pub/sub: {e}")
 
                     return proxy_response
         

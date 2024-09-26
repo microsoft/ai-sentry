@@ -16,9 +16,14 @@
         string first10Chars = originalString.Substring(0, 10);
         return first10Chars;
      }" />
+        <set-variable name="correlation-id" value="@(context.Request.Headers.GetValueOrDefault("x-correlation-id", Guid.NewGuid().ToString()))" />
         <set-header name="ai-sentry-calling-user" exists-action="override">
             <value>@((string)context.Variables.GetValueOrDefault("ai-sentry-callling-user"))</value>
         </set-header>
+        <trace source="Global APIM Policy" severity="information">
+            <message>@(String.Format("{0} | {1}", context.Api.Name, context.Variables["correlation-id"]))</message>
+            <metadata name="correlation-id" value="@((string)context.Variables["correlation-id"])" />
+        </trace>
         <rate-limit-by-key calls="300" renewal-period="15" counter-key="@(context.Request.Headers.GetValueOrDefault("api-key", "default-value"))" />
         <choose>
             <when condition="@((String)context.Variables["ai-sentry"]=="true")">
@@ -35,6 +40,9 @@
                 </set-header>
                 <set-header name="ai-sentry-adapters" exists-action="override">
                     <value>["SampleApiRequestTransformer"]</value>
+                </set-header>
+                <set-header name="x-aisentry-correlation" exists-action="override">
+                    <value>@((String)context.Variables["correlation-id"])</value>
                 </set-header>
                 <set-backend-service backend-id="be-aisentry" />
             </when>

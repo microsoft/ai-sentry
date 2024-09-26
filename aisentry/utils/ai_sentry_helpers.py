@@ -115,6 +115,12 @@ class AISentryHeaders:
                     raise ValueError("ai-sentry-adapters cannot be an empty string")
                 else:
                     valid_headers[header.lower()] = value
+            if header.lower() == "x-aisentry-correlation":
+                if value == "":
+                    logger.info("Assigning default value to x-aisentry-correlation")
+                    valid_headers[header.lower()] = "00000000-0000-0000-0000-000000000000"
+                else:
+                    valid_headers[header.lower()] = value
             elif header.lower() in self.header_values:
                 if value not in self.header_values[header.lower()]:
                     raise ValueError(f"Invalid value {value} for header {header}, accepted values FULL, PII_STRIPPING_ENABLED, DISABLED")
