@@ -16,21 +16,17 @@ import httpx
 import uuid
 from typing import List
 
+# initial setup for logging / env variable loading
+log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
 
-load_dotenv(".env", override=True)
-
-# Get log level from environment variable
-log_level = os.getenv('LOG-LEVEL', 'INFO').upper()
 logger = logging.getLogger(__name__)
-app = Flask(__name__)
-
-# Set up the loggerl 
 logging.basicConfig(level=getattr(logging, log_level),
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     datefmt='%d-%m-%Y %H:%M:%S'
                     )
+load_dotenv(".env", override=True)
 
-
+app = Flask(__name__)
 
 app_port = os.getenv('APP_PORT', '7000')
 

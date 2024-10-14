@@ -17,12 +17,15 @@ async def analyze_pii_async(input_text: List[str]) -> None:
     )
 
 
-    # initial setup for logging / env variable loading
-    log_level = os.getenv('LOG-LEVEL', 'INFO').upper()
-
-    # Set up the logger
-    logging.basicConfig(level=getattr(logging, log_level))
+# initial setup for logging / env variable loading
+    log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
+    
     logger = logging.getLogger(__name__)
+    logging.basicConfig(level=getattr(logging, log_level),
+                        format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%d-%m-%Y %H:%M:%S'
+                        )
+    load_dotenv(".env", override=True)
 
     logger.debug(f"input_text: {input_text}")
     chunk_size = 1250

@@ -23,16 +23,13 @@ from utils.ai_sentry_helpers import select_pool, init_endpoint_stats, getNextAva
 from adapters.adapters import return_adapter
 
 # initial setup for logging / env variable loading
-log_level = os.getenv('LOG-LEVEL', 'INFO').upper()
+log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
 
-# Set up the logger
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=getattr(logging, log_level),
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     datefmt='%d-%m-%Y %H:%M:%S'
                     )
-
-
 load_dotenv(".env", override=True)
 
 logger.info("Starting Ai-Sentry Facade app")
