@@ -6,8 +6,14 @@ import httpx
 import tiktoken
 
 
-logging.basicConfig(level=logging.INFO)
+# initial setup for logging / env variable loading
+log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
+
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=getattr(logging, log_level),
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    datefmt='%d-%m-%Y %H:%M:%S'
+                    )
 load_dotenv(".env", override=True)
 
 
