@@ -98,7 +98,7 @@ spec:
           env:
           - name: "AI-SENTRY-ENDPOINT-CONFIG"
             value: "{\"pools\":[{\"name\":\"pool1\",\"description\":\"pool1 description\",\"endpoints\":[{\"url\":\"https://youropenaiendpoint.openai.azure.com/openai\",\"api-key\":\"yourkey or simply null\"}]},{\"name\":\"pool2\",\"description\":\"pool2 description\",\"endpoints\":[{\"url\":\"https://youropenai.openai.azure.com/openai\",\"api-key or simply null\":\"yourkey or simply null\"},{\"url\":\"https://youropenai.openai.azure.com/openai\",\"api-key or simply null\":\"yourkey\"}]}]}"
-          - name: "LOG-LEVEL"
+          - name: "LOG_LEVEL"
             value: "INFO"
           ### Required by Workload Identity. Take the output of the clientID for the managed idenitty built and federated with AKS.
           - name: "AZURE_CLIENT_ID"
@@ -145,7 +145,7 @@ spec:
               value: "https://yourlanguageendpoint.cognitiveservices.azure.com/"
             - name: "AI-SENTRY-LANGUAGE-KEY"
               value: "your-key"
-            - name: "LOG-LEVEL"
+            - name: "LOG_LEVEL"
               value: "DEBUG"
             - name: "PII_STRIPPING_SERVICE"
               value: "OPENAI"
@@ -191,7 +191,7 @@ spec:
               containerPort: 7001
               protocol: TCP
           env:
-            - name: "LOG-LEVEL"
+            - name: "LOG_LEVEL"
               value: "INFO"
 ---
 # Components - REDIS based pub-sub
