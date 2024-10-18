@@ -68,6 +68,7 @@ async def create_batch_job():
         
         # Generate timestamps
         created_at = datetime.now(timezone.utc)
+
         try:
             value, unit = completion_window[:-1], completion_window[-1]
 
@@ -86,9 +87,9 @@ async def create_batch_job():
         # add metadata
         batch_response = BatchTrackingObject(
             completion_window=completion_window,
-            created_at=created_at.isoformat(),
+            created_at=str(created_at.isoformat()),
             endpoint=endpoint,
-            expires_at=expires_at.isoformat(),
+            expires_at=str(expires_at.isoformat()),
             id=batch_id,
             input_file_id=input_file_id,
             status='validating',
@@ -118,12 +119,12 @@ async def create_batch_job():
         
         # logger.info(f"Batch ID {batch_id} sent to queue for processing via Dapr")
         
-        cosmos_response = send_cosmos(batch_response, logger)
+        cosmos_response = await send_cosmos(batch_response.to_dict(), logger)
         if cosmos_response != 200:
             return jsonify({"error": "Failed to upload to cosmos"}), 500
         logger.info(f"Updated batch job info in CosmosDB")
 
-        queue_response = send_storage_queue(batch_id, logger)
+        queue_response = await send_storage_queue(batch_id, logger)
         if queue_response != 200:
             return jsonify({"error": "Failed to upload to queue"}), 500
         logger.info(f"Sent batch id to queue for processing")
