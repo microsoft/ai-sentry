@@ -2,16 +2,8 @@ import logging
 import uuid
 from datetime import datetime, timedelta
 from dapr.clients import DaprClient
-import httpcore
-from enum import Enum
-from typing import Tuple
 from quart import Quart, jsonify, request, make_response
-from quart.helpers import stream_with_context
-from urllib.request import urlopen
-from urllib.parse import urljoin
 from datetime import datetime, timezone
-import httpx
-from requests.exceptions import HTTPError
 import json
 from dotenv import load_dotenv
 import os
