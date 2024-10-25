@@ -7,8 +7,8 @@ from datetime import datetime, timezone
 import json
 from dotenv import load_dotenv
 import os
-from batch_helpers import check_authorisation, BatchTrackingObject
-from temporary_batch_methods import send_cosmos, send_storage_queue
+from batch_helpers import check_authorisation, BatchTrackingObject, send_to_cosmos, retrieve_item_from_cosmos
+# from temporary_batch_methods import send_cosmos, send_storage_queue
 
 
 load_dotenv(".env", override=True)
@@ -88,40 +88,15 @@ async def create_batch_job():
             metadata= metadata
         )
         
-        # # send response to CosmosDB
-        # with DaprClient() as d:
-        #     d.invoke_binding(
-        #         binding_name='cosmosdb-batch', #Need to create this
-        #         operation='create',
-        #         binding_metadata={
-        #             'partitionKey': 'id',
-        #         },
-        #         data=batch_response
-        #     )
-
-        # logger.info(f"Updated batch job info in CosmosDB via Dapr")
-
-        # # send batch_id to queue
-        # with DaprClient() as d:
-        #     d.invoke_binding(
-        #         name='azure-storage', #Need to create this
-        #         operation='create',
-        #         data=batch_id.encode('utf-8')
-        #     )
-        
-        # logger.info(f"Batch ID {batch_id} sent to queue for processing via Dapr")
-        
-        cosmos_response = await send_cosmos(batch_response.to_dict(), logger)
+        cosmos_response = await send_to_cosmos(batch_response.to_dict(), logger)
         if cosmos_response != 200:
             return jsonify({"error": "Failed to upload to cosmos"}), 500
         logger.info(f"Updated batch job info in CosmosDB")
 
-        queue_response = await send_storage_queue(batch_id, logger)
-        if queue_response != 200:
-            return jsonify({"error": "Failed to upload to queue"}), 500
-        logger.info(f"Sent batch id to queue for processing")
-
-        # want to log batch request as well?
+        # queue_response = await send_storage_queue(batch_id, logger)
+        # if queue_response != 200:
+        #     return jsonify({"error": "Failed to upload to queue"}), 500
+        # logger.info(f"Sent batch id to queue for processing")
 
         # Return the response
         return batch_response.to_json(), 201
@@ -130,11 +105,35 @@ async def create_batch_job():
         logger.error(f"Error processing batch request: {e}")
         return jsonify({"error": "Failed to process batch request"}), 500
 
-#Check status of batch job
-# could even combine with create_batch_job?
+# Check status of batch job
 @app.route('/batches/<string:batch_id>', methods=['GET'])
 async def track_batch_job(batch_id):
     try:
+        logger.info(f'Retrieving job {batch_id}')
+        
+        # Get headers, parameters and body
+        original_headers = request.headers
+        params = request.args
+
+        # Check authorisation
+
+        # Check record
+        cosmos_response, status = await retrieve_item_from_cosmos(batch_id)
+        if status == 404:
+            return jsonify({"error": cosmos_response}), 404
+        if status != 200:
+            return jsonify({"error": cosmos_response}), 500
+
+        return jsonify(cosmos_response), 200
+    except Exception as e:
+        logger.error(f"Error processing batch request: {e}")
+        return jsonify({"error": "Failed to process batch request"}), 500
+
+# Cancel batch job
+@app.route('/batches/<string:batch_id>/cancel', methods=['POST'])
+async def cancel_batch_job(batch_id):
+    try:
+        logger.info(f'Cancelling job {batch_id}')
         # Get headers, parameters and body
         original_headers = request.headers
         params = request.args
@@ -143,6 +142,34 @@ async def track_batch_job(batch_id):
     except:
         logger.info(f"Error retrieving batch request")
 
+# Check list of all batch jobs (for user?)
+@app.route('/batches/', methods=['GET'])
+async def track_batch_list():
+    try:
+        logger.info(f'Retrieving all jobs for Batch API')
+
+        # Get headers, parameters and body
+        original_headers = request.headers
+        params = request.args
+
+        # Retrieve query parameters
+        after = params.get('after')
+        limit = params.get('limit', type=int)
+
+        if limit is None:
+            limit = 20
+
+        # Apply 'after' and 'limit' filters
+        
+
+        return jsonify({"sup":"sup"}), 200
+    except Exception as e:
+        logger.error(f"Error processing batch request: {e}")
+        return jsonify({"error": "Failed to process batch request"}), 500
 
 if __name__ == '__main__':
     app.run(port=app_port, debug=True)
+
+
+#pause
+#try logging using structlog

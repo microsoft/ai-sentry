@@ -1,7 +1,20 @@
 from pydantic import BaseModel, model_validator, ValidationError, field_validator, ValidationInfo
 from typing import Optional, Literal
 from datetime import datetime
+import json
 import re
+from dotenv import load_dotenv
+import os
+# from azure.storage.queue import QueueServiceClient
+from azure.cosmos import CosmosClient, exceptions
+
+load_dotenv(".env", override=True)
+
+# CosmosDB configuration
+COSMOS_ENDPOINT = os.getenv('COSMOS_ENDPOINT')
+COSMOS_KEY = os.getenv('COSMOS_KEY')
+COSMOS_DATABASE_NAME = 'batch'
+COSMOS_CONTAINER_NAME = 'job_tracking'
 
 ValidBatchStatusTypes = Literal["validating", "failed", "in_progress", "finalizing", "completed","expired", "cancelling", "cancelled"]
 
@@ -54,3 +67,41 @@ class BatchTrackingObject(BaseModel):
     
     def to_json(self):
         return self.model_dump_json()
+    
+
+async def send_to_cosmos(body, logger):
+    try:
+        # Create cosmos client
+        client = CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
+        
+        # Get the database and container
+        database = client.get_database_client(COSMOS_DATABASE_NAME)
+        container = database.get_container_client(COSMOS_CONTAINER_NAME)
+        
+        # Create or update the item in the container
+        container.upsert_item(body)
+        
+        return 200  # OK
+    except exceptions.CosmosHttpResponseError as e:
+        logger.error(f"Failed to send to CosmosDB: {e}")
+        return 500  # Internal Server Error
+    
+async def retrieve_item_from_cosmos(item_id):
+    try:
+        # Create cosmos client
+        client = CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
+        
+        # Get the database and container
+        database = client.get_database_client(COSMOS_DATABASE_NAME)
+        container = database.get_container_client(COSMOS_CONTAINER_NAME)
+        
+        # Read item in the container
+        item = container.read_item(item=item_id, partition_key=item_id)
+        
+        return item, 200  # OK
+    except exceptions.CosmosResourceNotFoundError:
+        # logger.error(f"Item with id {item_id} not found.")
+        return f"Item with id {item_id} not found.", 404  # Not Found
+    except exceptions.CosmosHttpResponseError as e:
+        # logger.error(f"Failed to send to CosmosDB: {e}")
+        return f"Failed to upload to cosmos: {e}", 500  # Internal Server Error
