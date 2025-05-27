@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.textanalytics.aio import TextAnalyticsClient
 from azure.ai.textanalytics import RecognizePiiEntitiesAction
+import re
 
 async def analyze_pii_async(input_text: List[str]) -> List[str]:
     """
@@ -31,6 +32,25 @@ async def analyze_pii_async(input_text: List[str]) -> List[str]:
         endpoint=endpoint,
         credential=AzureKeyCredential(key),
     )
+
+
+
+def smart_json_loads(s: str):
+    """
+    Attempts to load a JSON string, unescaping double backslashes if necessary.
+    """
+    try:
+        # Try normal loading first
+        return json.loads(s)
+    except json.JSONDecodeError:
+        # Heuristic: if there are many double backslashes, try unescaping
+        if re.search(r'\\\\', s):
+            try:
+                unescaped = s.encode().decode('unicode_escape')
+                return json.loads(unescaped)
+            except Exception:
+                pass
+        raise  # Re-raise if still failing
 
     async def redact_pii_in_obj(obj, pii_entities):
         """
@@ -83,7 +103,8 @@ async def analyze_pii_async(input_text: List[str]) -> List[str]:
                 elif getattr(result, "is_error", False):
                     logger.error(f'PII-Processing: An error with code {result.error.code} and message {result.error.message}')
             try:
-                data = json.loads(doc_str)
+                #data = json.loads(doc_str)
+                data = smart_json_loads(doc_str)
                 redacted_data = await redact_pii_in_obj(data, pii_entities)
                 redacted_json = json.dumps(redacted_data, ensure_ascii=False, separators=(',', ':'))
                 output_texts.append(redacted_json)
