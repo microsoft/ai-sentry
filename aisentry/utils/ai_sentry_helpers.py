@@ -54,28 +54,18 @@ def init_endpoint_stats(pools_info):
 def select_pool(pool_endpoints, pool_name):
     return pool_endpoints.get(pool_name, None)
 
-async def getNextAvailableEndpointInfo(open_ai_endpoint_availability_stats):
+async def getNextAvailableEndpointInfo(open_ai_endpoint_availability_stats, criteria='requests'):
     logger.debug(f"open_ai_endpoint_availability_stats: {open_ai_endpoint_availability_stats}")
     remaining_requests = sorted(open_ai_endpoint_availability_stats ,key=lambda x: int(x['x-ratelimit-remaining-requests']), reverse=True)[0]
     remaining_tokens = sorted(open_ai_endpoint_availability_stats ,key=lambda x: int(x['x-ratelimit-remaining-tokens']), reverse=True)[0]
-    logger.info(f"Next available endpoint: {remaining_requests['url']}")
 
-    # Add a new key 'max_limit' to each dictionary that is the maximum of 'x-ratelimit-remaining-requests' and 'x-ratelimit-remaining-tokens'
-    # for endpoint in open_ai_endpoint_availability_stats:
-    #     endpoint['max_limit'] = max(endpoint['x-ratelimit-remaining-requests'], endpoint['x-ratelimit-remaining-tokens'])
+    if criteria == 'requests':
+        logger.info(f"Selected endpoint based on remaining requests: {remaining_requests['url']}")
+        return remaining_requests
+    elif criteria == 'tokens':
+        logger.info(f"Selected endpoint based on remaining tokens: {remaining_tokens['url']}")
+        return remaining_tokens
 
-    # Sort based on 'max_limit'
-    #sorted_endpoints = sorted(open_ai_endpoint_availability_stats ,key=lambda x: x['max_limit'], reverse=True)
-
-    # # Select the first endpoint with 'max_limit' greater than zero
-    # highest_endpoint = next((endpoint for endpoint in sorted_endpoints if endpoint['max_limit'] > 0), None)
-
-    # if highest_endpoint is not None:
-    #     logger.info(highest_endpoint)
-    # else:
-        # logger.info("No endpoint has a max_limit greater than zero.")
-
-    return remaining_requests
 
 
 
